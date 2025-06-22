@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -180,28 +179,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">Galería de Nuestra Urbanización</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">Conoce nuestras instalaciones y espacios diseñados para tu comodidad y bienestar</p>
-          </div>
-          <ImageGallery images={galleryImages} />
-        </div>
-      </section>
-
-      {/* Download Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">Archivos y Enlaces</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">Accede a documentos importantes y enlaces útiles para residentes</p>
-          </div>
-          <DownloadSection items={downloadItems} />
-        </div>
-      </section>
-
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -234,9 +211,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Acc
-
-                  ede a reglamentos, actas de reuniones y documentos importantes de la administración.
+                  Accede a reglamentos, actas de reuniones y documentos importantes de la administración.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -258,27 +233,14 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Publications Section */}
+      {/* Download Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4 font-inter">Publicaciones Recientes</h2>
-              <p className="text-xl text-gray-600 font-light">Las últimas noticias de nuestra comunidad</p>
-            </div>
-            <Link to="/publicaciones">
-              <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 rounded-full px-6">
-                Ver todas
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">Archivos y Enlaces</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">Accede a documentos importantes y enlaces útiles para residentes</p>
           </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredPublications.map((publication) => (
-              <PublicationCard key={publication.id} publication={publication} />
-            ))}
-          </div>
+          <DownloadSection items={downloadItems} />
         </div>
       </section>
 
@@ -340,6 +302,41 @@ const Index = () => {
                 className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">Galería de Nuestra Urbanización</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">Conoce nuestras instalaciones y espacios diseñados para tu comodidad y bienestar</p>
+          </div>
+          <ImageGallery images={galleryImages} />
+        </div>
+      </section>
+
+      {/* Featured Publications Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4 font-inter">Publicaciones Recientes</h2>
+              <p className="text-xl text-gray-600 font-light">Las últimas noticias de nuestra comunidad</p>
+            </div>
+            <Link to="/publicaciones">
+              <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 rounded-full px-6">
+                Ver todas
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredPublications.map((publication) => (
+              <PublicationCard key={publication.id} publication={publication} />
+            ))}
           </div>
         </div>
       </section>
