@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Bold, 
@@ -25,6 +25,13 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
   const editorRef = useRef<HTMLDivElement>(null);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+
+  // Solo establecer el contenido inicial una vez
+  useEffect(() => {
+    if (editorRef.current && !editorRef.current.innerHTML && value) {
+      editorRef.current.innerHTML = value;
+    }
+  }, []);
 
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -109,8 +116,11 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
         contentEditable
         className="min-h-[200px] p-4 focus:outline-none focus:ring-2 focus:ring-red-500"
         onInput={handleContentChange}
-        dangerouslySetInnerHTML={{ __html: value }}
-        style={{ whiteSpace: 'pre-wrap' }}
+        suppressContentEditableWarning={true}
+        style={{ 
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word'
+        }}
         data-placeholder={placeholder}
       />
 
@@ -149,6 +159,14 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        [contenteditable]:empty:before {
+          content: attr(data-placeholder);
+          color: #9ca3af;
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 };
