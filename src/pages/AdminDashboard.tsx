@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { Publication } from "@/types/Publication";
-import { Plus, Edit, Trash2, Eye, FileText, Users, Calendar, TrendingUp } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, FileText, Users, Calendar, TrendingUp, Search, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
@@ -15,6 +17,10 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [publications, setPublications] = useState<Publication[]>([]);
+  const [filteredPublications, setFilteredPublications] = useState<Publication[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedDateFilter, setSelectedDateFilter] = useState("all");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -54,7 +60,50 @@ const AdminDashboard = () => {
     ];
     
     setPublications(mockPublications);
+    setFilteredPublications(mockPublications);
   }, [isAuthenticated, navigate]);
+
+  // Filtrar publicaciones
+  useEffect(() => {
+    let filtered = publications;
+
+    // Filtrar por búsqueda
+    if (searchTerm) {
+      filtered = filtered.filter(pub => 
+        pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pub.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pub.author.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filtrar por categoría
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(pub => pub.category === selectedCategory);
+    }
+
+    // Filtrar por fecha
+    if (selectedDateFilter !== "all") {
+      const now = new Date();
+      const filterDate = new Date();
+      
+      switch (selectedDateFilter) {
+        case "today":
+          filterDate.setHours(0, 0, 0, 0);
+          filtered = filtered.filter(pub => new Date(pub.createdAt) >= filterDate);
+          break;
+        case "week":
+          filterDate.setDate(now.getDate() - 7);
+          filtered = filtered.filter(pub => new Date(pub.createdAt) >= filterDate);
+          break;
+        case "month":
+          filterDate.setMonth(now.getMonth() - 1);
+          filtered = filtered.filter(pub => new Date(pub.createdAt) >= filterDate);
+          break;
+      }
+    }
+
+    setFilteredPublications(filtered);
+  }, [publications, searchTerm, selectedCategory, selectedDateFilter]);
 
   const handleDeletePublication = (id: string) => {
     setPublications(publications.filter(pub => pub.id !== id));
@@ -82,6 +131,22 @@ const AdminDashboard = () => {
     };
     return colors[category] || 'bg-gray-100 text-gray-700';
   };
+
+  const categories = [
+    { value: "all", label: "Todas las categorías" },
+    { value: "general", label: "General" },
+    { value: "mantenimiento", label: "Mantenimiento" },
+    { value: "seguridad", label: "Seguridad" },
+    { value: "eventos", label: "Eventos" },
+    { value: "avisos", label: "Avisos" }
+  ];
+
+  const dateFilters = [
+    { value: "all", label: "Todas las fechas" },
+    { value: "today", label: "Hoy" },
+    { value: "week", label: "Última semana" },
+    { value: "month", label: "Último mes" }
+  ];
 
   if (!isAuthenticated) {
     return null;
@@ -162,9 +227,52 @@ const AdminDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Buscar publicaciones..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 border-red-200 focus:ring-red-500 focus:border-red-500"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-48 border-red-200 focus:ring-red-500 focus:border-red-500">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
+                  <SelectTrigger className="w-44 border-red-200 focus:ring-red-500 focus:border-red-500">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dateFilters.map((filter) => (
+                      <SelectItem key={filter.value} value={filter.value}>
+                        {filter.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-4">
-              {publications.length > 0 ? (
-                publications.map((publication) => (
+              {filteredPublications.length > 0 ? (
+                filteredPublications.map((publication) => (
                   <div
                     key={publication.id}
                     className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
@@ -207,8 +315,13 @@ const AdminDashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No hay publicaciones</h3>
-                  <p className="text-gray-600 mb-4">Comienza creando tu primera publicación</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron publicaciones</h3>
+                  <p className="text-gray-600 mb-4">
+                    {searchTerm || selectedCategory !== "all" || selectedDateFilter !== "all" 
+                      ? "Intenta ajustar los filtros de búsqueda"
+                      : "Comienza creando tu primera publicación"
+                    }
+                  </p>
                   <Link to="/admin/crear-publicacion">
                     <Button className="bg-red-600 hover:bg-red-700 text-white">
                       <Plus className="h-4 w-4 mr-2" />
