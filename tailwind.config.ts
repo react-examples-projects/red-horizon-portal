@@ -19,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'sans': ['Inter', 'system-ui', 'sans-serif'],
+				'inter': ['Inter', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -63,6 +67,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			backgroundImage: {
+				'gradient-red': 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)',
+				'gradient-red-dark': 'linear-gradient(135deg, #991B1B 0%, #DC2626 50%, #EF4444 100%)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
