@@ -6,7 +6,7 @@ import { ImageGallery } from "@/components/ImageGallery";
 import { DownloadSection } from "@/components/DownloadSection";
 import { Navbar } from "@/components/Navbar";
 import { Publication } from "@/types/Publication";
-import { ArrowRight, Shield, Users, Bell, FileText, Images, Calendar } from "lucide-react";
+import { ArrowRight, MapPinHouse, Users, BookCopy, FileText, UsersRound, BookText } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -148,7 +148,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-inter">
       <Navbar />
-      
+
       {/* Hero Section con gradiente mejorado */}
       <section className="relative bg-gradient-red text-white py-24 overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
@@ -157,20 +157,32 @@ const Index = () => {
           <div className="text-center animate-slide-up">
             <h1 className="text-5xl md:text-7xl font-bold mb-8 font-inter">
               Bienvenidos a
-              <span className="block text-red-100 font-light">Portal Residencial</span>
+              <span className="block text-red-100 font-light">
+                Aldea Universitaria Base de Misiones Che Guevara
+              </span>
             </h1>
             <p className="text-xl md:text-2xl mb-10 text-red-50 max-w-3xl mx-auto font-light leading-relaxed">
-              Tu comunidad conectada. Mantente informado sobre noticias, eventos y servicios de nuestra urbanización.
+              La Aldea Universitaria Base de Misiones Che Guevara, ubicada en Valle de la Pascua,
+              garantiza el acceso inclusivo a la educación universitaria, formando profesionales
+              comprometidos con el desarrollo local, enmarcados en una ética socialista y el
+              pensamiento bolivariano.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link to="/publicaciones">
-                <Button size="lg" className="btn-gradient text-white border-0 text-lg px-10 py-4 rounded-full font-medium shadow-lg">
+                <Button
+                  size="lg"
+                  className=" bg-red-500 text-white border-0 text-lg px-10 py-4 rounded-full font-medium shadow-lg"
+                >
                   Ver Publicaciones
                   <ArrowRight className="ml-3 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/login">
-                <Button size="lg" variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm text-lg px-10 py-4 rounded-full font-medium">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-white/30 text-black backdrop-blur-sm text-lg px-10 py-4 rounded-full font-medium"
+                >
                   Portal Administrativo
                 </Button>
               </Link>
@@ -183,21 +195,30 @@ const Index = () => {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">Servicios Disponibles</h2>
-            <p className="text-xl text-gray-600 font-light">Todo lo que necesitas para una mejor convivencia</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">
+              Formación y Comunidad
+            </h2>
+            <p className="text-xl text-gray-600 font-light">
+              Nuestra Aldea Universitaria trabaja de la mano con las comunidades del sector Padre
+              Chacín y zonas aledañas, promoviendo la organización popular y el desarrollo social.
+            </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="text-center hover:shadow-xl transition-all duration-300 border-red-100 hover:border-red-200 group">
               <CardHeader>
                 <div className="mx-auto w-16 h-16 bg-gradient-red rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Bell className="h-8 w-8 text-white" />
+                  <BookCopy className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="text-red-700 text-xl font-semibold">Avisos Importantes</CardTitle>
+                <CardTitle className="text-red-700 text-xl font-semibold">
+                  Servicios / Formación
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Mantente informado sobre avisos, mantenimientos y eventos importantes de la comunidad.
+                  La Aldea Universitaria ofrece Programas Nacionales de Formación gratuitos y
+                  adaptados a las necesidades del pueblo, con enfoque social y comunitario, formando
+                  profesionales comprometidos con el desarrollo local.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -211,7 +232,9 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Accede a reglamentos, actas de reuniones y documentos importantes de la administración.
+                  Consulta y descarga documentos esenciales como reglamentos, planes de estudio,
+                  constancias, calendarios académicos y otros recursos necesarios para el desarrollo
+                  académico.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -225,7 +248,9 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base leading-relaxed">
-                  Participa en eventos, conoce a tus vecinos y fortalece los lazos comunitarios.
+                  La aldea mantiene una estrecha relación con las comunidades vecinas, promoviendo
+                  la participación activa en proyectos sociales, culturales y educativos que
+                  fortalecen el desarrollo colectivo.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -238,7 +263,9 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">Archivos y Enlaces</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">Accede a documentos importantes y enlaces útiles para residentes</p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">
+              Accede a documentos importantes y enlaces útiles para residentes
+            </p>
           </div>
           <DownloadSection items={downloadItems} />
         </div>
@@ -249,33 +276,54 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-8 font-inter">Información de la Urbanización</h2>
+              <h2 className="text-4xl font-bold text-gray-900 mb-8 font-inter">
+                Información de la Urbanización
+              </h2>
               <div className="space-y-8">
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  La Urbanización Padre Chacín es una zona residencial de fácil acceso en Valle de
+                  la Pascua, que alberga la sede de la aldea, facilitando el acceso a la educación
+                  superior a jóvenes y adultos de sectores urbanos y rurales.
+                </p>
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-gradient-red rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Shield className="h-6 w-6 text-white" />
+                    <MapPinHouse className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2">Seguridad 24/7</h3>
-                    <p className="text-gray-600 leading-relaxed">Vigilancia continua para tu tranquilidad y la de tu familia.</p>
+                    <h3 className="font-semibold text-gray-900 text-lg mb-2">
+                      Ubicación estratégica
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Está situada al este de Valle de la Pascua, lo que facilita el acceso a la
+                      educación para estudiantes de comunidades urbanas y rurales cercanas.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-gradient-red rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Calendar className="h-6 w-6 text-white" />
+                    <BookText className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2">Eventos Regulares</h3>
-                    <p className="text-gray-600 leading-relaxed">Actividades familiares y comunitarias durante todo el año.</p>
+                    <h3 className="font-semibold text-gray-900 text-lg mb-2">Sede educativa</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      En esta urbanización se encuentra la sede de la Aldea Universitaria Base de
+                      Misiones Che Guevara, específicamente en la E.B.N. Williams Lara, lo que la
+                      convierte en un punto clave para la formación universitaria local.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-gradient-red rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Images className="h-6 w-6 text-white" />
+                    <UsersRound className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2">Áreas Recreativas</h3>
-                    <p className="text-gray-600 leading-relaxed">Espacios verdes, parques infantiles y áreas deportivas.</p>
+                    <h3 className="font-semibold text-gray-900 text-lg mb-2">
+                      Apoyo a la inclusión
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Su cercanía y accesibilidad contribuyen significativamente a la inclusión
+                      educativa y al ascenso social de los bachilleres de la zona.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -310,8 +358,22 @@ const Index = () => {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">Galería de Nuestra Urbanización</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">Conoce nuestras instalaciones y espacios diseñados para tu comodidad y bienestar</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-6 font-inter">
+              Galería de Nuestra Urbanización
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light mb-3">
+              La Urbanización Padre Chacín se ubica al este de Valle de la Pascua, Estado Guárico.
+              Es una comunidad residencial que cuenta con servicios básicos, espacios deportivos y
+              educativos.
+            </p>
+
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">
+              Su ubicación estratégica permite el fácil acceso a la Aldea Universitaria Base de
+              Misiones Che Guevara, beneficiando a jóvenes y adultos de sectores vecinos, tanto
+              urbanos como rurales. Esta comunidad es ejemplo de organización y participación
+              ciudadana, y ha sido clave en el impulso de proyectos educativos y sociales en la
+              zona.
+            </p>
           </div>
           <ImageGallery images={galleryImages} />
         </div>
@@ -322,17 +384,24 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4 font-inter">Publicaciones Recientes</h2>
-              <p className="text-xl text-gray-600 font-light">Las últimas noticias de nuestra comunidad</p>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4 font-inter">
+                Publicaciones Recientes
+              </h2>
+              <p className="text-xl text-gray-600 font-light">
+                Las últimas noticias de nuestra comunidad
+              </p>
             </div>
             <Link to="/publicaciones">
-              <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 rounded-full px-6">
+              <Button
+                variant="outline"
+                className="border-red-200 text-red-600 hover:bg-red-50 rounded-full px-6"
+              >
                 Ver todas
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredPublications.map((publication) => (
               <PublicationCard key={publication.id} publication={publication} />

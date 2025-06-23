@@ -19,7 +19,7 @@ export const Navbar = () => {
               <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
                 <Home className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">Portal Residencial</span>
+              <span className="text-xl font-bold text-gray-900">Che Guevara</span>
             </Link>
           </div>
 
@@ -27,20 +27,20 @@ export const Navbar = () => {
             <Link
               to="/"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/') 
-                  ? 'bg-red-100 text-red-700' 
-                  : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                isActive("/")
+                  ? "bg-red-100 text-red-700"
+                  : "text-gray-700 hover:text-red-600 hover:bg-red-50"
               }`}
             >
               Inicio
             </Link>
-            
+
             <Link
               to="/publicaciones"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/publicaciones') 
-                  ? 'bg-red-100 text-red-700' 
-                  : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                isActive("/publicaciones")
+                  ? "bg-red-100 text-red-700"
+                  : "text-gray-700 hover:text-red-600 hover:bg-red-50"
               }`}
             >
               Publicaciones
@@ -51,19 +51,17 @@ export const Navbar = () => {
                 <Link
                   to="/admin"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive('/admin') 
-                      ? 'bg-red-100 text-red-700' 
-                      : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                    isActive("/admin")
+                      ? "bg-red-100 text-red-700"
+                      : "text-gray-700 hover:text-red-600 hover:bg-red-50"
                   }`}
                 >
                   <Settings className="h-4 w-4 inline mr-1" />
                   Panel Admin
                 </Link>
-                
-                <span className="text-sm text-gray-600">
-                  Hola, {user.email}
-                </span>
-                
+
+                <span className="text-sm text-gray-600">Hola, {user.email}</span>
+
                 <Button
                   onClick={logout}
                   variant="outline"
@@ -77,7 +75,11 @@ export const Navbar = () => {
             ) : (
               <div className="flex items-center space-x-2">
                 <Link to="/login">
-                  <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                  >
                     <User className="h-4 w-4 mr-1" />
                     Iniciar Sesión
                   </Button>
