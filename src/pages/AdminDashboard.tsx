@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/hooks/useAuth";
+import useSession from "@/hooks/useSession";
+
 import { Publication } from "@/types/Publication";
 import { Plus, Edit, Trash2, Eye, FileText, Users, Calendar, TrendingUp, Search, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useSession();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [publications, setPublications] = useState<Publication[]>([]);

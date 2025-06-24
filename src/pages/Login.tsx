@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAuth } from "@/hooks/useAuth";
+import useSession from "@/hooks/useSession";
 import { Navbar } from "@/components/Navbar";
 import { Eye, EyeOff, User, Lock, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -17,8 +16,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  const { login } = useAuth();
+
+  const { login } = useSession();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -28,16 +27,13 @@ const Login = () => {
     setError("");
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        toast({
-          title: "Inicio de sesión exitoso",
-          description: "Bienvenido al panel administrativo",
-        });
-        navigate("/admin");
-      } else {
-        setError("Correo electrónico o contraseña incorrectos");
-      }
+      await login(email, password);
+
+      toast({
+        title: "Inicio de sesión exitoso",
+        description: "Bienvenido al panel administrativo",
+      });
+      navigate("/admin");
     } catch (err) {
       setError("Error al iniciar sesión. Inténtalo de nuevo.");
     } finally {
@@ -48,7 +44,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
@@ -146,8 +142,12 @@ const Login = () => {
               <div className="text-sm text-blue-700">
                 <p className="font-semibold mb-2">Credenciales de prueba:</p>
                 <div className="space-y-1">
-                  <p><strong>Admin:</strong> admin@urbanizacion.com / admin123</p>
-                  <p><strong>Editor:</strong> editor@urbanizacion.com / editor123</p>
+                  <p>
+                    <strong>Admin:</strong> admin@urbanizacion.com / admin123
+                  </p>
+                  <p>
+                    <strong>Editor:</strong> editor@urbanizacion.com / editor123
+                  </p>
                 </div>
               </div>
             </CardContent>

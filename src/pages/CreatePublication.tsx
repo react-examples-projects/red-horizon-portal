@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/hooks/useAuth";
+import useSession from "@/hooks/useSession";
+
 import RichTextEditor from "@/components/RichTextEditor";
 import { Upload, X, FileText, Image, ArrowLeft, File } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const CreatePublication = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useSession();
   const navigate = useNavigate();
   const { toast } = useToast();
   

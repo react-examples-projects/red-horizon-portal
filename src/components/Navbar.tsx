@@ -2,11 +2,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, User, LogOut, Settings, FileText } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import useSession from "@/hooks/useSession";
 
 export const Navbar = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout } = useSession();
   
   const isActive = (path: string) => location.pathname === path;
 

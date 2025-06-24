@@ -1,18 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import Publications from "./pages/Publications";
-import AdminDashboard from "./pages/AdminDashboard";
-import CreatePublication from "./pages/CreatePublication";
-import EditPublication from "./pages/EditPublication";
-import NotFound from "./pages/NotFound";
 import { SessionProvider } from "@/context/SessionContext";
+import Routers from "@/Routes";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,18 +19,7 @@ const App = () => (
       <SessionProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/publicaciones" element={<Publications />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/crear-publicacion" element={<CreatePublication />} />
-            <Route path="/admin/editar-publicacion/:id" element={<EditPublication />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <Routers />
       </SessionProvider>
     </TooltipProvider>
   </QueryClientProvider>

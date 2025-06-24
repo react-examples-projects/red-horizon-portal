@@ -1,20 +1,21 @@
 import { useState, useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { removeToken } from "@/lib/token";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { removeToken, setToken } from "@/lib/token";
 import { removeUserData } from "@/lib/userData";
-
+import { login as loginUser } from "@/lib/api";
 const DEFAULT_STATE = { user: null };
 
 export default function useSessionContext() {
   const [session, setSession] = useState(DEFAULT_STATE);
   const queryClient = useQueryClient();
-
+  const mutation = useMutation({
+    mutationFn: loginUser,
+  });
   const setUser = useCallback((user) => {
     setSession((prev) => ({
       ...prev,
       user: {
         ...user,
-        isAdmin: user?.role === "fiba",
       },
     }));
   }, []);
@@ -27,5 +28,17 @@ export default function useSessionContext() {
     setSession(DEFAULT_STATE);
   }, [queryClient]);
 
-  return { ...session, setSession, setUser, logout };
+  const login = async (email, password) => {
+    try {
+      const data = await mutation.mutateAsync({ email, password });
+      setUser(data);
+      setToken(data.token);
+      location.href = "/dashboard"; // Redirect to dashboard after login
+    } catch (err) {
+      console.error("Error during authentication:", err);
+      throw new Error("Authentication failed");
+    }
+  };
+
+  return { ...session, setSession, setUser, logout, login };
 }
