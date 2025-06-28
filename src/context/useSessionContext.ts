@@ -30,10 +30,12 @@ export default function useSessionContext() {
 
   const login = async (email, password) => {
     try {
-      const data = await mutation.mutateAsync({ email, password });
-      setUser(data);
-      setToken(data.token);
-      location.href = "/dashboard"; // Redirect to dashboard after login
+      const res = await mutation.mutateAsync({ email, password });
+      const { user, token } = res;
+      setUser(user);
+      setToken(token);
+      console.log({user})
+      location.href = "/publicaciones";
     } catch (err) {
       console.error("Error during authentication:", err);
       throw new Error("Authentication failed");

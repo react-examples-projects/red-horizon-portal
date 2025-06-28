@@ -13,14 +13,14 @@ export const route = (component, path = "*", rest) => {
   };
 };
 
-export const privateRoute = (component, path = "/", props) => {
+export const privateRoute = (component, path = "/", props={}) => {
   return route(component, path, { private: true, ...props });
 };
 
-export const redirectRoute = (component, path = "/", props) => {
+export const redirectRoute = (component, path = "/", props = {}) => {
   return route(component, path, { redirect: true, ...props });
 };
 
-export const publicRoute = (component, path = "/", props) => {
+export const publicRoute = (component, path = "/", props = {}) => {
   return route(component, path, { public: true, ...props });
 };

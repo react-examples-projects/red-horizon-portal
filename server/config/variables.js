@@ -12,9 +12,8 @@ const SERVER = {
     SECRET_TOKEN: process.env.SECRET_TOKEN,
     IS_PRODUCTION: process.env.NODE_ENV === "production",
     ALLOWED_DOMAINS: [
-      "http://127.0.0.1:3000",
       "http://localhost:3000",
-      "https://mern-template-ruddy.vercel.app",
+      "http://localhost:8080",
     ],
     RATE_LIMITS: {
       windowMs: 10 * 60 * 1000, // 10 minutes

@@ -1,25 +1,25 @@
 const UserService = require("../services/userService");
 const { unauthorized, success, error } = require("../helpers/httpResponses");
-const {
-  hashPassword,
-  getTokenFromPayload,
-  isInvalidPassword,
-} = require("../helpers/utils");
+const { hashPassword, getTokenFromPayload, isInvalidPassword } = require("../helpers/utils");
 
 class AuthController {
   async login(req, res, next) {
     try {
       const { email, password } = req.body;
       const user = await UserService.existsUser(email);
-      if (user) {
-        if (isInvalidPassword(password, user.password))
-          return error(res, "Usuario o clave incorrecta");
 
-        delete user.password;
-        const token = getTokenFromPayload(user);
-        return success(res, { user, token });
+      if (!user) {
+        return unauthorized(res, "Usuario o clave incorrecta");
       }
-      error(res, "Usuario o clave incorrecta");
+
+      if (isInvalidPassword(password, user.password)) {
+        return error(res, "Usuario o clave incorrecta");
+      }
+
+      delete user.password;
+      const token = getTokenFromPayload(user);
+
+      return success(res, { user, token });
     } catch (err) {
       next(err);
     }

@@ -5,6 +5,7 @@ import { useSession as useSessionContext } from "@/context/SessionContext";
 
 export default function useSession() {
   const { user, ...context } = useSessionContext();
+
   const { data: session = user, ...args } = useQuery({
     queryKey: ["userSession"],
     queryFn: getUserSession,
@@ -14,6 +15,8 @@ export default function useSession() {
   });
 
   const isAuthenticated = existsToken() && isValidToken();
+
+  // console.log({ session, user, isAuthenticated });
 
   return {
     session,

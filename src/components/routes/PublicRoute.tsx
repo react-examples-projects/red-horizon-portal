@@ -1,28 +1,25 @@
-import { Navigate } from "react-router-dom";
+
 import { useEffect } from "react";
 import useSession from "@/hooks/useSession";
 
-function PrivateRoute({ children }) {
+function PublicRoute({ children }) {
   const { setUser, user, isLoading, session } = useSession();
+
   useEffect(() => {
     if (session !== null && session !== undefined && !user) {
       setUser(session);
     }
   }, [session, setUser, user]);
 
-  if (isLoading || (session && !user)) return null;
+  if (isLoading) return null;
 
-  if (!isLoading && session && !user) {
+  if(!isLoading && session && !user){
     return null; // Prevents rendering if session exists but user is not set
   }
 
   console.log({ session, user });
 
-  if (session || user) {
-    return children;
-  }
-
-  return <Navigate to="/" replace />;
+  return children;
 }
 
-export default PrivateRoute;
+export default PublicRoute;

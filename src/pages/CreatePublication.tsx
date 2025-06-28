@@ -25,11 +25,6 @@ const CreatePublication = () => {
   const [documents, setDocuments] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!isAuthenticated) {
-    navigate("/login");
-    return null;
-  }
-
   const categories = [
     { value: "general", label: "General" },
     { value: "mantenimiento", label: "Mantenimiento" },

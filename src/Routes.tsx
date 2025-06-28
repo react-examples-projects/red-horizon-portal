@@ -1,13 +1,10 @@
-
 import PrivateRoute from "@/components/routes/PrivateRoute";
 import RedirectRoute from "@/components/routes/RedirectRoute";
 import routers from "@/config";
-import useSession from "@/hooks/useSession";
+import PublicRoute from "@/components/routes/PublicRoute";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 
 export default function Routers() {
-  const { session } = useSession();
-
   return (
     <BrowserRouter>
       <Routes>
@@ -18,40 +15,26 @@ export default function Routers() {
               element: Element,
               private: isPrivate,
               redirect: isRedirect,
-              roles = ["fiba", "federation"],
+
               ...props
             },
             i
           ) => {
             const key = path || i;
             const AuthRoute = isPrivate ? PrivateRoute : isRedirect ? RedirectRoute : null;
-            const isAllowedUser = roles.includes(session?.role);
 
             const Wrapper = () =>
               AuthRoute === null ? (
-                <Element />
+                <PublicRoute>
+                  <Element />
+                </PublicRoute>
               ) : (
                 <AuthRoute>
                   <Element />
                 </AuthRoute>
               );
 
-            return (
-              <Route
-                element={
-                  !isAllowedUser && isPrivate && session ? (
-                    <Navigate to="/dashboard" />
-                  ) : (
-                   
-                      <Wrapper />
-                    
-                  )
-                }
-                path={path}
-                key={key}
-                {...props}
-              />
-            );
+            return <Route element={<Wrapper />} path={path} key={key} {...props} />;
           }
         )}
       </Routes>

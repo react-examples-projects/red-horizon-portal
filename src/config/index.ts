@@ -9,14 +9,14 @@ import EditPublication from "@/pages/EditPublication";
 import NotFound from "@/pages/NotFound";
 
 const routes = [
+  privateRoute(Publications, "/publicaciones"),
+  privateRoute(AdminDashboard, "/admin"),
+  privateRoute(CreatePublication, "/admin/crear-publicacion"),
+  privateRoute(EditPublication, "/admin/editar-publicacion/:id"),
+  redirectRoute(Login, "/login"),
   route(Index, "/", { public: true }),
-  route(Login, "/login", { public: true }),
   route(ForgotPassword, "/forgot-password", { public: true }),
-  route(Publications, "/publicaciones", { public: true }),
-  privateRoute(AdminDashboard, "/admin", { private: true }),
-  privateRoute(CreatePublication, "/admin/crear-publicacion", { private: true }),
-  privateRoute(EditPublication, "/admin/editar-publicacion/:id", { private: true }),
-  redirectRoute(NotFound, "*", { redirect: true }),
+  route(NotFound, "*", { public1: true }),
 ];
 
 export default routes;

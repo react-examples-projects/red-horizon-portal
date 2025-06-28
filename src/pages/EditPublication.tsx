@@ -24,10 +24,6 @@ const EditPublication = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-  if (!isAuthenticated) {
-    navigate("/login");
-    return null;
-  }
 
   const categories = [
     { value: "general", label: "General" },

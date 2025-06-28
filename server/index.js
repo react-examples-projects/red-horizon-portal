@@ -16,9 +16,11 @@ app.use(
     methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
     credentials: true,
     origin(origin, cb) {
-      if (SERVER.API.ALLOWED_DOMAINS.includes(origin)) {
+      if (SERVER.API.ALLOWED_DOMAINS.includes(origin) || !origin) {
         return cb(null, true);
       }
+      console.warn(`CORS: ${origin} NO está permitido para realizar peticiones al servidor`);
+
       cb(new Error("Su cliente no puede realizar peticiones al servidor"));
     },
   })

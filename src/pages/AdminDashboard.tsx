@@ -24,11 +24,6 @@ const AdminDashboard = () => {
   const [selectedDateFilter, setSelectedDateFilter] = useState("all");
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
-
     // Simulación de datos de publicaciones
     const mockPublications: Publication[] = [
       {
@@ -62,7 +57,7 @@ const AdminDashboard = () => {
     
     setPublications(mockPublications);
     setFilteredPublications(mockPublications);
-  }, [isAuthenticated, navigate]);
+  }, [navigate]);
 
   // Filtrar publicaciones
   useEffect(() => {
@@ -148,10 +143,6 @@ const AdminDashboard = () => {
     { value: "week", label: "Última semana" },
     { value: "month", label: "Último mes" }
   ];
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

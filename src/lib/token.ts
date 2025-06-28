@@ -12,7 +12,7 @@ export function removeToken() {
   localStorage.removeItem("auth_token");
 }
 
-export function setToken(auth_token : string) {
+export function setToken(auth_token: string) {
   localStorage.setItem("auth_token", auth_token);
 }
 
@@ -27,10 +27,11 @@ export function isValidToken() {
       removeToken();
       return false;
     }
+
+    return true;
   } catch {
+    console.error("Invalid token format or decoding error");
     removeToken();
     return false;
   }
-
-  return true;
 }
