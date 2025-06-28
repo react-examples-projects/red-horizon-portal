@@ -29,6 +29,9 @@ importers:
       express-fileupload:
         specifier: 1.4.0
         version: 1.4.0
+      express-list-endpoints:
+        specifier: ^7.1.1
+        version: 7.1.1
       express-rate-limit:
         specifier: 6.4.0
         version: 6.4.0(express@4.18.1)
@@ -361,6 +364,10 @@ packages:
   express-fileupload@1.4.0:
     resolution: {integrity: sha512-RjzLCHxkv3umDeZKeFeMg8w7qe0V09w3B7oGZprr/oO2H/ISCgNzuqzn7gV3HRWb37GjRk429CCpSLS2KNTqMQ==}
     engines: {node: '>=12.0.0'}
+
+  express-list-endpoints@7.1.1:
+    resolution: {integrity: sha512-SA6YHH1r6DrioJ4fFJNqiwu1FweGFqJZO9KBApMzwPosoSGPOX2AW0wiMepOXjojjEXDuP9whIvckomheErbJA==}
+    engines: {node: '>=18'}
 
   express-rate-limit@6.4.0:
     resolution: {integrity: sha512-lxQRZI4gi3qAWTf0/Uqsyugsz57h8bd7QyllXBgJvd6DJKokzW7C5DTaNvwzvAQzwHGFaItybfYGhC8gpu0V2A==}
@@ -1311,6 +1318,8 @@ snapshots:
   express-fileupload@1.4.0:
     dependencies:
       busboy: 1.6.0
+
+  express-list-endpoints@7.1.1: {}
 
   express-rate-limit@6.4.0(express@4.18.1):
     dependencies:

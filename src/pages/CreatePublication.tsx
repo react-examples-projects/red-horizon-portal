@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -6,10 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import useSession from "@/hooks/useSession";
+import { useCreatePost } from "@/hooks/usePosts";
 
-import RichTextEditor from "@/components/RichTextEditor";
+import RichTextEditor from "@/components/ui/RichEditorText";
 import { Upload, X, FileText, Image, ArrowLeft, File } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,40 +23,43 @@ const CreatePublication = () => {
   const { user, isAuthenticated } = useSession();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [documents, setDocuments] = useState<File[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Hook de React Query
+  const createPostMutation = useCreatePost();
 
   const categories = [
     { value: "general", label: "General" },
     { value: "mantenimiento", label: "Mantenimiento" },
     { value: "seguridad", label: "Seguridad" },
     { value: "eventos", label: "Eventos" },
-    { value: "avisos", label: "Avisos" }
+    { value: "avisos", label: "Avisos" },
   ];
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validImages = files.filter(file => file.type.startsWith('image/'));
+    const validImages = files.filter((file) => file.type.startsWith("image/"));
     setImages([...images, ...validImages]);
   };
 
   const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(file => 
-      file.type === 'application/pdf' || 
-      file.type.includes('word') || 
-      file.type.includes('excel') ||
-      file.type.includes('spreadsheet') ||
-      file.name.endsWith('.pdf') ||
-      file.name.endsWith('.doc') ||
-      file.name.endsWith('.docx') ||
-      file.name.endsWith('.xls') ||
-      file.name.endsWith('.xlsx')
+    const validFiles = files.filter(
+      (file) =>
+        file.type === "application/pdf" ||
+        file.type.includes("word") ||
+        file.type.includes("excel") ||
+        file.type.includes("spreadsheet") ||
+        file.name.endsWith(".pdf") ||
+        file.name.endsWith(".doc") ||
+        file.name.endsWith(".docx") ||
+        file.name.endsWith(".xls") ||
+        file.name.endsWith(".xlsx")
     );
     setDocuments([...documents, ...validFiles]);
   };
@@ -65,47 +74,63 @@ const CreatePublication = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    // Simulación de guardado
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Crear la publicación con imágenes y documentos en una sola petición
+      await createPostMutation.mutateAsync({
+        title,
+        description,
+        category,
+        images: images.length > 0 ? images : undefined,
+        documents: documents.length > 0 ? documents : undefined,
+      });
+
       toast({
         title: "Publicación creada",
         description: "La publicación ha sido creada exitosamente",
       });
+
       navigate("/admin");
-    }, 2000);
+    } catch (error) {
+      console.error("Error al crear la publicación:", error);
+      toast({
+        title: "Error",
+        description: "Hubo un error al crear la publicación. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
+    const extension = fileName.split(".").pop()?.toLowerCase();
     switch (extension) {
-      case 'pdf':
+      case "pdf":
         return <FileText className="h-5 w-5 text-red-500" />;
-      case 'doc':
-      case 'docx':
+      case "doc":
+      case "docx":
         return <File className="h-5 w-5 text-blue-500" />;
-      case 'xls':
-      case 'xlsx':
+      case "xls":
+      case "xlsx":
         return <File className="h-5 w-5 text-green-500" />;
       default:
         return <FileText className="h-5 w-5 text-gray-500" />;
     }
   };
 
+  const isLoading = createPostMutation.isPending;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -162,11 +187,7 @@ const CreatePublication = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descripción *</Label>
-                <RichTextEditor
-                  value={description}
-                  onChange={setDescription}
-                  placeholder="Describe detalladamente el contenido de la publicación..."
-                />
+                <RichTextEditor value={description} onChange={setDescription} />
               </div>
             </CardContent>
           </Card>
@@ -175,7 +196,9 @@ const CreatePublication = () => {
           <Card className="border-red-100">
             <CardHeader>
               <CardTitle className="text-red-700">Imágenes</CardTitle>
-              <CardDescription>Agrega imágenes para ilustrar tu publicación (opcional)</CardDescription>
+              <CardDescription>
+                Agrega imágenes para ilustrar tu publicación (opcional)
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="border-2 border-dashed border-red-200 rounded-lg p-6 text-center">
@@ -250,7 +273,10 @@ const CreatePublication = () => {
               {documents.length > 0 && (
                 <div className="space-y-2">
                   {documents.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                    >
                       <div className="flex items-center gap-3">
                         {getFileIcon(file.name)}
                         <div>
@@ -279,6 +305,7 @@ const CreatePublication = () => {
               variant="outline"
               onClick={() => navigate("/admin")}
               className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+              disabled={isLoading}
             >
               Cancelar
             </Button>

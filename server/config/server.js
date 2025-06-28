@@ -1,8 +1,8 @@
-
 const { SERVER } = require("./variables");
 const wrapServerErrors = require("../middlewares/errorsHandling");
-const { message } = require("../helpers/utils");
+const { message, formatRoutes } = require("../helpers/utils");
 const { connectDb, closeDb } = require("../config/connection");
+const listEndpoints = require("express-list-endpoints");
 
 async function startServer(app, routers) {
   try {
@@ -17,6 +17,7 @@ async function startServer(app, routers) {
 
     const server = app.listen(SERVER.PORT, async () => {
       message.success(`Server has started in http://localhost:${SERVER.PORT}/`);
+      formatRoutes(listEndpoints(app));
       process.on("SIGINT", () => closeDb(server));
       process.on("SIGTERM", () => closeDb(server));
     });

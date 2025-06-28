@@ -81,10 +81,74 @@ const requireIdValidation = yup.object({
   }),
 });
 
+// Validaciones para Post
+const createPostSchemaValidation = yup.object({
+  body: yup.object({
+    title: yup
+      .string()
+      .min(3, "El título debe tener mínimo 3 caracteres")
+      .max(200, "El título debe tener máximo 200 caracteres")
+      .required("El título es obligatorio"),
+    category: yup
+      .string()
+      .min(2, "La categoría debe tener mínimo 2 caracteres")
+      .max(50, "La categoría debe tener máximo 50 caracteres")
+      .required("La categoría es obligatoria"),
+    description: yup
+      .string()
+      .min(10, "La descripción debe tener mínimo 10 caracteres")
+      .max(2000, "La descripción debe tener máximo 2000 caracteres")
+      .required("La descripción es obligatoria"),
+  }),
+});
+
+const updatePostSchemaValidation = yup.object({
+  params: yup.object({
+    id: idSchema,
+  }),
+  body: yup.object({
+    title: yup
+      .string()
+      .min(3, "El título debe tener mínimo 3 caracteres")
+      .max(200, "El título debe tener máximo 200 caracteres")
+      .optional(),
+    category: yup
+      .string()
+      .min(2, "La categoría debe tener mínimo 2 caracteres")
+      .max(50, "La categoría debe tener máximo 50 caracteres")
+      .optional(),
+    description: yup
+      .string()
+      .min(10, "La descripción debe tener mínimo 10 caracteres")
+      .max(2000, "La descripción debe tener máximo 2000 caracteres")
+      .optional(),
+  }),
+});
+
+const getPostsByCategorySchemaValidation = yup.object({
+  params: yup.object({
+    category: yup
+      .string()
+      .min(2, "La categoría debe tener mínimo 2 caracteres")
+      .required("La categoría es requerida"),
+  }),
+});
+
+const getPostsByAuthorSchemaValidation = yup.object({
+  params: yup.object({
+    authorId: idSchema,
+  }),
+});
+
 module.exports = {
   loginSchemaValidation,
   signupSchemaValidation,
   perfilPhotoSchemaValidation,
   passwordChangeValidation,
   requireIdValidation,
+  // Validaciones para Post
+  createPostSchemaValidation,
+  updatePostSchemaValidation,
+  getPostsByCategorySchemaValidation,
+  getPostsByAuthorSchemaValidation,
 };

@@ -148,3 +148,17 @@
     transform: translateY(0); 
   }
 }
+
+.ql-toolbar, .ql-container{
+  border-color: rgb(254 202 202 / var(--tw-border-opacity)) !important;
+}
+
+.ql-toolbar{
+  border-top-left-radius: calc(var(--radius) - 2px);
+  border-top-right-radius: calc(var(--radius) - 2px);
+}
+
+.ql-container{
+  border-bottom-left-radius: calc(var(--radius) - 2px);
+  border-bottom-right-radius: calc(var(--radius) - 2px);
+}

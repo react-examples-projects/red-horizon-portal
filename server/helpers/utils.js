@@ -48,6 +48,46 @@ function isRequestAjaxOrApi(req) {
   return !req.accepts("html") || req.xhr;
 }
 
+function formatRoutes(routes) {
+  // Calculamos el ancho máximo de cada columna
+  const methodColWidth = Math.max(
+    ...routes.map((r) => r.methods.join(", ").length),
+    "METHODS".length
+  );
+  const pathColWidth = Math.max(...routes.map((r) => r.path.length), "PATH".length);
+  const middlewareColWidth = Math.max(
+    ...routes.map((r) => r.middlewares.join(", ").length),
+    "MIDDLEWARES".length
+  );
+
+  // Encabezado
+  const header =
+    padRight("METHODS", methodColWidth) +
+    " | " +
+    padRight("PATH", pathColWidth) +
+    " | " +
+    padRight("MIDDLEWARES", middlewareColWidth);
+  const separator = "-".repeat(header.length);
+
+  console.log(header);
+  console.log(separator);
+
+  // Filas
+  for (const route of routes) {
+    const methods = padRight(route.methods.join(", "), methodColWidth);
+    const path = padRight(route.path, pathColWidth);
+    const middlewares = padRight(route.middlewares.join(", "), middlewareColWidth);
+    console.log(`${methods} | ${path} | ${middlewares}`);
+  }
+
+  // Función auxiliar
+  function padRight(text, width) {
+    return text + " ".repeat(width - text.length);
+  }
+}
+
+
+
 module.exports = {
   message,
   getTokenInfo,
@@ -55,4 +95,5 @@ module.exports = {
   isInvalidPassword,
   isRequestAjaxOrApi,
   getTokenFromPayload,
+  formatRoutes,
 };

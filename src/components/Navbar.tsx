@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, User, LogOut, Settings, FileText } from "lucide-react";
@@ -7,7 +6,7 @@ import useSession from "@/hooks/useSession";
 export const Navbar = () => {
   const location = useLocation();
   const { user, logout } = useSession();
-  
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -35,17 +34,18 @@ export const Navbar = () => {
               Inicio
             </Link>
 
-            <Link
-              to="/publicaciones"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive("/publicaciones")
-                  ? "bg-red-100 text-red-700"
-                  : "text-gray-700 hover:text-red-600 hover:bg-red-50"
-              }`}
-            >
-              Publicaciones
-            </Link>
-
+            {!!user && (
+              <Link
+                to="/publicaciones"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive("/publicaciones")
+                    ? "bg-red-100 text-red-700"
+                    : "text-gray-700 hover:text-red-600 hover:bg-red-50"
+                }`}
+              >
+                Publicaciones
+              </Link>
+            )}
             {user ? (
               <div className="flex items-center space-x-3">
                 <Link

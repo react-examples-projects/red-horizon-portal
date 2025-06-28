@@ -1,17 +1,17 @@
-
 export interface Publication {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   category: string;
-  author: string;
+  images: string[];
+  documents: string[];
+  author: {
+    _id: string;
+    name: string;
+    email: string;
+    perfil_photo?: string;
+  };
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  images?: string[];
-  attachments?: {
-    name: string;
-    url: string;
-    type: string;
-    size: number;
-  }[];
 }
