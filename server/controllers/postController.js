@@ -120,7 +120,7 @@ class PostController {
         authorId,
         updateData,
       });
-      success(res, post, "Publicación actualizada exitosamente");
+      success(res, post);
     } catch (err) {
       next(err);
     }

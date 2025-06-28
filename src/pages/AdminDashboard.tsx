@@ -410,13 +410,15 @@ const AdminDashboard = () => {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-blue-200 text-blue-600 hover:bg-blue-50"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
+                          <Link to={`/admin/publicacion/${publication._id}`}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                          </Link>
                           <Link to={`/admin/editar-publicacion/${publication._id}`}>
                             <Button
                               size="sm"
