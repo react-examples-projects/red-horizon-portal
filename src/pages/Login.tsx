@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ const Login = () => {
 
   const { login } = useSession();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,13 +27,19 @@ const Login = () => {
     setError("");
 
     try {
+      console.log("Intentando login con:", { email, password });
       await login(email, password);
+      console.log("Login exitoso");
 
       toast({
         title: "Inicio de sesión exitoso",
         description: "Bienvenido al panel administrativo",
       });
+
+      // Navegar después del login exitoso
+      navigate("/publicaciones");
     } catch (err) {
+      console.error("Error en login:", err);
       setError("Error al iniciar sesión. Inténtalo de nuevo.");
     } finally {
       setIsLoading(false);
@@ -43,7 +50,7 @@ const Login = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex mt-7 justify-center min-h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4">
@@ -133,8 +140,6 @@ const Login = () => {
               </form>
             </CardContent>
           </Card>
-
-       
         </div>
       </div>
     </div>

@@ -1,49 +1,58 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PublicationCard } from "@/components/PublicationCard";
 import { ImageGallery } from "@/components/ImageGallery";
 import { DownloadSection } from "@/components/DownloadSection";
 import { Navbar } from "@/components/Navbar";
-import { Publication } from "@/types/Publication";
-import { ArrowRight, MapPinHouse, Users, BookCopy, FileText, UsersRound, BookText } from "lucide-react";
+import PublicationCarousel from "@/components/PublicationCarousel";
+import { useGetLatestPosts } from "@/hooks/usePosts";
+import {
+  ArrowRight,
+  MapPinHouse,
+  Users,
+  BookCopy,
+  FileText,
+  UsersRound,
+  BookText,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
-  const [featuredPublications, setFeaturedPublications] = useState<Publication[]>([]);
+  // Hook para obtener las últimas publicaciones
+  const { data: latestPostsData, isLoading: isLoadingPosts } = useGetLatestPosts(10);
+  const latestPublications = latestPostsData?.posts || [];
 
   // Datos para la galería
   const galleryImages = [
     {
       url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop",
       title: "Entrada Principal",
-      description: "Vista de la entrada principal de la urbanización"
+      description: "Vista de la entrada principal de la urbanización",
     },
     {
       url: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=600&h=400&fit=crop",
       title: "Área de Seguridad",
-      description: "Caseta de vigilancia 24/7"
+      description: "Caseta de vigilancia 24/7",
     },
     {
       url: "https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=600&h=400&fit=crop",
       title: "Jardines",
-      description: "Espacios verdes y áreas de recreación"
+      description: "Espacios verdes y áreas de recreación",
     },
     {
       url: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop",
       title: "Áreas Comunes",
-      description: "Salón de eventos y reuniones"
+      description: "Salón de eventos y reuniones",
     },
     {
       url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop",
       title: "Parque Infantil",
-      description: "Área de juegos para niños"
+      description: "Área de juegos para niños",
     },
     {
       url: "https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=600&h=400&fit=crop",
       title: "Piscina Comunitaria",
-      description: "Área de piscina y recreación acuática"
-    }
+      description: "Área de piscina y recreación acuática",
+    },
   ];
 
   // Datos para archivos y enlaces
@@ -54,7 +63,7 @@ const Index = () => {
       description: "Normativas actualizadas para la convivencia en la urbanización",
       type: "pdf" as const,
       url: "/docs/reglamento-2024.pdf",
-      size: "2.5 MB"
+      size: "2.5 MB",
     },
     {
       id: "2",
@@ -62,7 +71,7 @@ const Index = () => {
       description: "Guía completa para nuevos residentes",
       type: "pdf" as const,
       url: "/docs/manual-propietario.pdf",
-      size: "1.8 MB"
+      size: "1.8 MB",
     },
     {
       id: "3",
@@ -70,7 +79,7 @@ const Index = () => {
       description: "Plantilla para solicitudes administrativas",
       type: "word" as const,
       url: "/docs/formulario-solicitudes.docx",
-      size: "125 KB"
+      size: "125 KB",
     },
     {
       id: "4",
@@ -78,72 +87,23 @@ const Index = () => {
       description: "Hoja de cálculo para control de visitas",
       type: "excel" as const,
       url: "/docs/registro-visitantes.xlsx",
-      size: "85 KB"
+      size: "85 KB",
     },
     {
       id: "5",
       title: "Portal de Pagos Online",
       description: "Accede al sistema de pagos de administración",
       type: "link" as const,
-      url: "https://pagos.urbanizacion.com"
+      url: "https://pagos.urbanizacion.com",
     },
     {
       id: "6",
       title: "Directorio de Emergencias",
       description: "Números importantes y servicios de emergencia",
       type: "link" as const,
-      url: "https://emergencias.urbanizacion.com"
-    }
+      url: "https://emergencias.urbanizacion.com",
+    },
   ];
-
-  useEffect(() => {
-    // Simulación de datos de publicaciones destacadas
-    const mockPublications: Publication[] = [
-      {
-        id: "1",
-        title: "Nuevo Reglamento de Convivencia 2024",
-        description: "Se ha actualizado el reglamento de convivencia con nuevas normas para el uso de áreas comunes y horarios de visitas.",
-        category: "general",
-        author: "Administración",
-        createdAt: "2024-01-15T10:00:00Z",
-        updatedAt: "2024-01-15T10:00:00Z",
-        attachments: [
-          {
-            name: "Reglamento_Convivencia_2024.pdf",
-            url: "/docs/reglamento.pdf",
-            type: "PDF",
-            size: 2048000
-          }
-        ]
-      },
-      {
-        id: "2",
-        title: "Mantenimiento del Sistema Eléctrico",
-        description: "Programado corte de energía eléctrica el próximo viernes 26 de enero de 8:00 AM a 12:00 PM para mantenimiento preventivo.",
-        category: "mantenimiento",
-        author: "Comité de Mantenimiento",
-        createdAt: "2024-01-20T14:30:00Z",
-        updatedAt: "2024-01-20T14:30:00Z",
-        images: [
-          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop"
-        ]
-      },
-      {
-        id: "3",
-        title: "Celebración Día de la Familia",
-        description: "Los invitamos a participar en la celebración del Día de la Familia que se realizará el próximo domingo en el área recreativa.",
-        category: "eventos",
-        author: "Comité Social",
-        createdAt: "2024-01-18T16:00:00Z",
-        updatedAt: "2024-01-18T16:00:00Z",
-        images: [
-          "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400&h=300&fit=crop",
-          "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=300&fit=crop"
-        ]
-      }
-    ];
-    setFeaturedPublications(mockPublications);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 font-inter">
@@ -168,7 +128,7 @@ const Index = () => {
               pensamiento bolivariano.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link to="/publicaciones">
+              <Link to="/publicaciones-publicas">
                 <Button
                   size="lg"
                   className=" bg-red-500 text-white border-0 text-lg px-10 py-4 rounded-full font-medium shadow-lg"
@@ -391,7 +351,7 @@ const Index = () => {
                 Las últimas noticias de nuestra comunidad
               </p>
             </div>
-            <Link to="/publicaciones">
+            <Link to="/publicaciones-publicas">
               <Button
                 variant="outline"
                 className="border-red-200 text-red-600 hover:bg-red-50 rounded-full px-6"
@@ -402,11 +362,7 @@ const Index = () => {
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredPublications.map((publication) => (
-              <PublicationCard key={publication.id} publication={publication} />
-            ))}
-          </div>
+          <PublicationCarousel publications={latestPublications} isLoading={isLoadingPosts} />
         </div>
       </section>
 

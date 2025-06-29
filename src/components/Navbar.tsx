@@ -10,13 +10,19 @@ export const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-white shadow-lg border-b-2 border-red-100">
+    <nav className="bg-white pb-5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <img src="/header_left.gif" />
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                <Home className="h-5 w-5 text-white" />
+              <div className="w-16 h-16">
+                {/* <Home className="h-5 w-5 text-white" /> */}
+                <img
+                  className="object-contain w-full h-full "
+                  src="/logo.gif"
+                  
+                />
               </div>
               <span className="text-xl font-bold text-gray-900">Che Guevara</span>
             </Link>

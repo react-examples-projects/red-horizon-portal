@@ -1,4 +1,5 @@
 const { hashPassword } = require("../helpers/utils");
+const { deletePostFiles } = require("../helpers/cloudinary");
 
 class PostService {
   constructor() {
@@ -124,45 +125,6 @@ class PostService {
     };
   }
 
-  // Método para debugging - obtener posts en orden natural de la base de datos
-  async getAllPostsNaturalOrder(query = {}) {
-    const { page = 1, limit = 10 } = query;
-
-    const currentPage = Math.max(1, parseInt(page) || 1);
-    const itemsPerPage = Math.max(1, Math.min(100, parseInt(limit) || 10));
-    const skip = (currentPage - 1) * itemsPerPage;
-
-    const filter = { isActive: true };
-    const total = await this.PostModel.countDocuments(filter);
-    const totalPages = Math.ceil(total / itemsPerPage);
-
-    // Obtener posts sin ordenamiento personalizado (orden natural de MongoDB)
-    const posts = await this.PostModel.find(filter)
-      .populate("author", "name email perfil_photo")
-      .skip(skip)
-      .limit(itemsPerPage)
-      .lean();
-
-    return {
-      posts,
-      pagination: {
-        page: currentPage,
-        limit: itemsPerPage,
-        total,
-        pages: totalPages,
-        hasNextPage: currentPage < totalPages,
-        hasPrevPage: currentPage > 1,
-        nextPage: currentPage < totalPages ? currentPage + 1 : null,
-        prevPage: currentPage > 1 ? currentPage - 1 : null,
-        showing: {
-          from: total > 0 ? skip + 1 : 0,
-          to: Math.min(skip + itemsPerPage, total),
-          total,
-        },
-      },
-    };
-  }
-
   async getPostById(id) {
     const post = await this.PostModel.findById(id)
       .populate("author", "name email perfil_photo")
@@ -204,6 +166,16 @@ class PostService {
       throw new Error("No tienes permisos para eliminar esta publicación");
     }
 
+    // Eliminar archivos de Cloudinary antes de eliminar el post
+    let cloudinaryResults = null;
+    try {
+      cloudinaryResults = await deletePostFiles(existingPost);
+      console.log("Archivos eliminados de Cloudinary:", cloudinaryResults);
+    } catch (error) {
+      console.error("Error al eliminar archivos de Cloudinary:", error);
+      // Continuar con la eliminación del post incluso si falla la eliminación de archivos
+    }
+
     // Soft delete - marcar como inactivo en lugar de eliminar
     const postDeleted = await this.PostModel.findByIdAndUpdate(
       id,
@@ -213,24 +185,18 @@ class PostService {
       .populate("author", "name email perfil_photo")
       .lean();
 
-    return postDeleted;
+    // Agregar información sobre la eliminación de archivos a la respuesta
+    const response = {
+      post: postDeleted,
+      cloudinaryCleanup: cloudinaryResults,
+    };
+
+    return response;
   }
 
   async getPostsByCategory(category) {
     const posts = await this.PostModel.find({
       category: { $regex: category, $options: "i" },
-      isActive: true,
-    })
-      .populate("author", "name email perfil_photo")
-      .sort({ createdAt: -1 })
-      .lean();
-
-    return posts;
-  }
-
-  async getPostsByAuthor(authorId) {
-    const posts = await this.PostModel.find({
-      author: authorId,
       isActive: true,
     })
       .populate("author", "name email perfil_photo")

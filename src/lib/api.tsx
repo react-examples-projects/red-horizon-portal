@@ -14,12 +14,20 @@ axiosInstance.interceptors.request.use((req) => {
     "/auth/login",
     "/auth/reset-password",
     "/auth/recover-password",
+    "/posts",
+    "/user",
   ];
   const resetPatterns = [/^\/reset\/[a-zA-Z0-9]+$/, /^\/resetAdmin\/[a-zA-Z0-9]+$/];
+  const publicPostPattern = /^\/posts\/public\/[a-zA-Z0-9]+$/;
+  const postsPattern = /^\/posts(\?.*)?$/;
   const matchCurrentUrl = resetPatterns.some((pattern) => pattern.test(req.url));
-  const isAllowedUrl = allowedUrls.includes(req.url) || matchCurrentUrl;
+  const matchPublicPost = publicPostPattern.test(req.url);
+  const matchPosts = postsPattern.test(req.url);
+  const isAllowedUrl =
+    allowedUrls.includes(req.url) || matchCurrentUrl || matchPublicPost || matchPosts;
 
-  if ((req.url === "/user" && !isValidToken()) || (!isAllowedUrl && !isValidToken())) {
+  // Solo redirigir si no es una URL permitida y no hay token válido
+  if (!isAllowedUrl && !isValidToken()) {
     if (getToken()) removeToken();
     window.location.href = "/";
     return Promise.reject(new Error("Invalid session, please login again"));
@@ -34,18 +42,9 @@ axiosInstance.interceptors.request.use((req) => {
 
 axiosInstance.interceptors.response.use(
   (res) => {
-    if (res.status >= 400 && res.status < 600) {
-      return Promise.reject(res);
-    }
-
     return res;
   },
   (err) => {
-    if ((!err.response && err.response?.status === 401) || err.response?.status === 403) {
-      // removeToken();
-      return Promise.reject(err);
-    }
-
     const { code, message, response } = err || {};
     const { data, config, status } = response || {};
 
@@ -172,5 +171,11 @@ export const deletePost = async (id: string) => {
 
 export const getMyPosts = async () => {
   const response = await axiosInstance.get("/posts/me/posts");
+  return response.data?.data;
+};
+
+// Public API requests (sin autenticación)
+export const getPublicPostById = async (id: string) => {
+  const response = await axiosInstance.get(`/posts/public/${id}`);
   return response.data?.data;
 };

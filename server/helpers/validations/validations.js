@@ -134,12 +134,6 @@ const getPostsByCategorySchemaValidation = yup.object({
   }),
 });
 
-const getPostsByAuthorSchemaValidation = yup.object({
-  params: yup.object({
-    authorId: idSchema,
-  }),
-});
-
 module.exports = {
   loginSchemaValidation,
   signupSchemaValidation,
@@ -150,5 +144,4 @@ module.exports = {
   createPostSchemaValidation,
   updatePostSchemaValidation,
   getPostsByCategorySchemaValidation,
-  getPostsByAuthorSchemaValidation,
 };

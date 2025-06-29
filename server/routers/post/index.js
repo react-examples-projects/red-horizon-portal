@@ -7,24 +7,20 @@ const {
   createPostSchemaValidation,
   updatePostSchemaValidation,
   getPostsByCategorySchemaValidation,
-  getPostsByAuthorSchemaValidation,
   requireIdValidation,
 } = require("../../helpers/validations/validations");
 
 // Rutas públicas (no requieren autenticación)
 router.get("/", postController.getAllPosts);
-router.get("/debug/natural-order", postController.getAllPostsNaturalOrder);
 router.get(
   "/category/:category",
   validate(getPostsByCategorySchemaValidation),
   postController.getPostsByCategory
 );
-router.get(
-  "/author/:authorId",
-  validate(getPostsByAuthorSchemaValidation),
-  postController.getPostsByAuthor
-);
 router.get("/:id", validate(requireIdValidation), postController.getPostById);
+
+// Ruta específica para posts públicos (más descriptiva)
+router.get("/public/:id", validate(requireIdValidation), postController.getPublicPost);
 
 // Rutas protegidas (requieren autenticación)
 router.use(existsToken);
@@ -33,8 +29,5 @@ router.use(existsToken);
 router.post("/", validate(createPostSchemaValidation), postController.createPost);
 router.patch("/:id", validate(updatePostSchemaValidation), postController.updatePost);
 router.delete("/:id", validate(requireIdValidation), postController.deletePost);
-
-// Rutas específicas del usuario autenticado
-router.get("/me/posts", postController.getMyPosts);
 
 module.exports = router;

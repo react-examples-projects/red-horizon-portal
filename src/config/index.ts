@@ -7,6 +7,8 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import CreatePublication from "@/pages/CreatePublication";
 import EditPublication from "@/pages/EditPublication";
 import ViewPublication from "@/pages/ViewPublication";
+import PublicPost from "@/pages/PublicPost";
+import PublicPublications from "@/pages/PublicPublications";
 import NotFound from "@/pages/NotFound";
 
 const routes = [
@@ -15,10 +17,12 @@ const routes = [
   privateRoute(CreatePublication, "/admin/crear-publicacion"),
   privateRoute(EditPublication, "/admin/editar-publicacion/:id"),
   privateRoute(ViewPublication, "/admin/publicacion/:id"),
+  route(PublicPost, "/post/:id", { public: true }),
+  route(PublicPublications, "/publicaciones-publicas", { public: true }),
   redirectRoute(Login, "/login"),
   route(Index, "/", { public: true }),
   route(ForgotPassword, "/forgot-password", { public: true }),
-  route(NotFound, "*", { public1: true }),
+  route(NotFound, "*", { public: true }),
 ];
 
 export default routes;

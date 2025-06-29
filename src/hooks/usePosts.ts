@@ -4,6 +4,7 @@ import {
   getPostsByCategory,
   getPostsByAuthor,
   getPostById,
+  getPublicPostById,
   createPost,
   updatePost,
   deletePost,
@@ -18,6 +19,8 @@ export const postKeys = {
   list: (filters: string) => [...postKeys.lists(), { filters }] as const,
   details: () => [...postKeys.all, "detail"] as const,
   detail: (id: string) => [...postKeys.details(), id] as const,
+  public: () => [...postKeys.all, "public"] as const,
+  publicDetail: (id: string) => [...postKeys.public(), id] as const,
   myPosts: () => [...postKeys.all, "my-posts"] as const,
   byCategory: (category: string) => [...postKeys.all, "category", category] as const,
   byAuthor: (authorId: string) => [...postKeys.all, "author", authorId] as const,
@@ -36,6 +39,17 @@ export const useGetAllPosts = (params?: {
   return useQuery({
     queryKey: [...postKeys.lists(), params],
     queryFn: () => getAllPosts(params),
+  });
+};
+
+export const useGetLatestPosts = (limit: number = 10) => {
+  return useQuery({
+    queryKey: [...postKeys.lists(), "latest", limit],
+    queryFn: () => getAllPosts({ limit, page: 1 }),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 
@@ -79,6 +93,14 @@ export const useGetPostById = (id: string) => {
   return useQuery({
     queryKey: postKeys.detail(id),
     queryFn: () => getPostById(id),
+    enabled: !!id,
+  });
+};
+
+export const useGetPublicPostById = (id: string) => {
+  return useQuery({
+    queryKey: postKeys.publicDetail(id),
+    queryFn: () => getPublicPostById(id),
     enabled: !!id,
   });
 };

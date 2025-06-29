@@ -1,5 +1,5 @@
 const PostService = require("../services/postService");
-const { uploadImages, uploadDocuments } = require("../helpers/requests");
+const { uploadMultipleImages, uploadMultipleDocuments } = require("../helpers/cloudinary");
 const { success, error } = require("../helpers/httpResponses");
 
 class PostController {
@@ -21,9 +21,14 @@ class PostController {
       if (req.files && req.files.images) {
         const imageFiles = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
 
-        const uploadedImages = await Promise.all(imageFiles.map((file) => uploadImages(file.data)));
+        // Extraer los buffers de las imágenes
+        const imageBuffers = imageFiles.map((file) => file.data);
 
-        postData.images = uploadedImages.map((img) => img.url);
+        // Subir imágenes a Cloudinary
+        const uploadedImages = await uploadMultipleImages(imageBuffers);
+
+        // Guardar las URLs de las imágenes
+        postData.images = uploadedImages.map((img) => img.secure_url);
       }
 
       // Procesar documentos si se subieron (completamente opcional)
@@ -32,11 +37,14 @@ class PostController {
           ? req.files.documents
           : [req.files.documents];
 
-        const uploadedDocuments = await Promise.all(
-          documentFiles.map((file) => uploadDocuments(file.data))
-        );
+        // Extraer los buffers de los documentos
+        const documentBuffers = documentFiles.map((file) => file.data);
 
-        postData.documents = uploadedDocuments.map((doc) => doc.url);
+        // Subir documentos a Cloudinary
+        const uploadedDocuments = await uploadMultipleDocuments(documentBuffers);
+
+        // Guardar las URLs de los documentos
+        postData.documents = uploadedDocuments.map((doc) => doc.secure_url);
       }
 
       const post = await PostService.createPost(postData);
@@ -80,15 +88,14 @@ class PostController {
     }
   }
 
-  // Método de debugging para obtener posts en orden natural
-  async getAllPostsNaturalOrder(req, res, next) {
+  // Método específico para posts públicos (sin autenticación)
+  async getPublicPost(req, res, next) {
     try {
-      const { page, limit } = req.query;
-      const result = await PostService.getAllPostsNaturalOrder({
-        page,
-        limit,
-      });
-      success(res, result);
+      const { id } = req.params;
+      const post = await PostService.getPostById(id);
+
+      // Respuesta específica para posts públicos
+      success(res, post);
     } catch (err) {
       next(err);
     }
@@ -131,8 +138,30 @@ class PostController {
       const { id } = req.params;
       const authorId = req.user._id;
 
-      const post = await PostService.deletePost({ id, authorId });
-      success(res, post, "Publicación eliminada exitosamente");
+      const result = await PostService.deletePost({ id, authorId });
+
+      // Preparar mensaje de respuesta
+      let message = "Publicación eliminada exitosamente";
+
+      if (result.cloudinaryCleanup) {
+        const { images, documents } = result.cloudinaryCleanup;
+        const totalDeleted = images.deleted + documents.deleted;
+        const totalFailed = images.failed + documents.failed;
+
+        if (totalDeleted > 0) {
+          message += `. Se eliminaron ${totalDeleted} archivo(s) de Cloudinary`;
+        }
+
+        if (totalFailed > 0) {
+          message += `. No se pudieron eliminar ${totalFailed} archivo(s)`;
+        }
+      }
+
+      success(res, {
+        post: result.post,
+        cloudinaryCleanup: result.cloudinaryCleanup,
+        message,
+      });
     } catch (err) {
       next(err);
     }
@@ -142,26 +171,6 @@ class PostController {
     try {
       const { category } = req.params;
       const posts = await PostService.getPostsByCategory(category);
-      success(res, posts);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getPostsByAuthor(req, res, next) {
-    try {
-      const { authorId } = req.params;
-      const posts = await PostService.getPostsByAuthor(authorId);
-      success(res, posts);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getMyPosts(req, res, next) {
-    try {
-      const authorId = req.user._id;
-      const posts = await PostService.getPostsByAuthor(authorId);
       success(res, posts);
     } catch (err) {
       next(err);

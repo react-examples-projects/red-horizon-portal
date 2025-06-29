@@ -12,6 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import useSession from "@/hooks/useSession";
 import { useGetInfinitePosts, useDeletePost } from "@/hooks/usePosts";
 import HtmlContent from "@/components/ui/html-content";
@@ -45,6 +55,8 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedDateFilter, setSelectedDateFilter] = useState("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<{ id: string; title: string } | null>(null);
 
   // Hooks de React Query
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } =
@@ -103,6 +115,8 @@ const AdminDashboard = () => {
         title: "Publicación eliminada",
         description: "La publicación ha sido eliminada exitosamente",
       });
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
     } catch (error) {
       console.error("Error al eliminar la publicación:", error);
       toast({
@@ -111,6 +125,16 @@ const AdminDashboard = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleDeleteClick = (publication: Publication) => {
+    setPostToDelete({ id: publication._id, title: publication.title });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setPostToDelete(null);
   };
 
   const handleClearFilters = () => {
@@ -431,7 +455,7 @@ const AdminDashboard = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleDeletePublication(publication._id)}
+                            onClick={() => handleDeleteClick(publication)}
                             disabled={deletePostMutation.isPending}
                             className="border-red-200 text-red-600 hover:bg-red-50"
                           >
@@ -474,6 +498,41 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteDialogOpen && postToDelete && (
+        <AlertDialog open={deleteDialogOpen} onOpenChange={handleCancelDelete}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminar Publicación</AlertDialogTitle>
+              <AlertDialogDescription>
+                ¿Estás seguro de que quieres eliminar la publicación "{postToDelete.title}"?
+                <br />
+                <span className="text-red-600 font-medium">Esta acción no se puede deshacer.</span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deletePostMutation.isPending}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => handleDeletePublication(postToDelete.id)}
+                disabled={deletePostMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {deletePostMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Eliminando...
+                  </>
+                ) : (
+                  "Eliminar"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };
