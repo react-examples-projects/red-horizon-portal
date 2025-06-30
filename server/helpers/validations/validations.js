@@ -122,6 +122,76 @@ const updatePostSchemaValidation = yup.object({
       .min(10, "La descripción debe tener mínimo 10 caracteres")
       .max(2000, "La descripción debe tener máximo 2000 caracteres")
       .optional(),
+    imagesToDelete: yup
+      .mixed()
+      .test("is-valid-array", "Debe ser un array válido de IDs", function (value) {
+        if (!value) return true; // Es opcional
+
+        let arrayToValidate = [];
+
+        // Si es un string, intentar parsearlo como JSON
+        if (typeof value === "string") {
+          try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+              arrayToValidate = parsed;
+            } else {
+              return false;
+            }
+          } catch (error) {
+            return false;
+          }
+        }
+        // Si ya es un array, usarlo directamente
+        else if (Array.isArray(value)) {
+          arrayToValidate = value;
+        }
+        // Si no es ni string ni array, es inválido
+        else {
+          return false;
+        }
+
+        // Validar que cada elemento sea un ObjectId válido
+        return arrayToValidate.every(
+          (id) => typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id)
+        );
+      })
+      .optional(),
+    documentsToDelete: yup
+      .mixed()
+      .test("is-valid-array", "Debe ser un array válido de IDs", function (value) {
+        if (!value) return true; // Es opcional
+
+        let arrayToValidate = [];
+
+        // Si es un string, intentar parsearlo como JSON
+        if (typeof value === "string") {
+          try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+              arrayToValidate = parsed;
+            } else {
+              return false;
+            }
+          } catch (error) {
+            return false;
+          }
+        }
+        // Si ya es un array, usarlo directamente
+        else if (Array.isArray(value)) {
+          arrayToValidate = value;
+        }
+        // Si no es ni string ni array, es inválido
+        else {
+          return false;
+        }
+
+        // Validar que cada elemento sea un ObjectId válido
+        return arrayToValidate.every(
+          (id) => typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id)
+        );
+      })
+      .optional(),
   }),
 });
 

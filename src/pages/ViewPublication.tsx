@@ -62,7 +62,11 @@ const ViewPublication = () => {
     return labels[category] || category;
   };
 
-  const getFileIcon = (fileName: string) => {
+  const getFileIcon = (fileName: string | undefined | null) => {
+    if (!fileName) {
+      return <FileText className="h-5 w-5 text-gray-500" />;
+    }
+
     const extension = fileName.split(".").pop()?.toLowerCase();
     switch (extension) {
       case "pdf":
@@ -78,8 +82,8 @@ const ViewPublication = () => {
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
+  const formatFileSize = (bytes: number | undefined | null) => {
+    if (!bytes || bytes === 0) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -225,16 +229,20 @@ const ViewPublication = () => {
                       {publication.images.map((image: any, index: number) => (
                         <div key={index} className="relative group">
                           <img
-                            src={image.url}
+                            src={image?.url}
                             alt={`Imagen ${index + 1}`}
                             className="w-full h-48 object-cover rounded-lg border border-gray-200 hover:shadow-lg transition-shadow"
+                            onError={(e) => {
+                              e.currentTarget.src = "/placeholder.svg";
+                            }}
                           />
                           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
                             <Button
                               size="sm"
                               variant="secondary"
                               className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => window.open(image.url, "_blank")}
+                              onClick={() => window.open(image?.url, "_blank")}
+                              disabled={!image?.url}
                             >
                               <Eye className="h-4 w-4 mr-1" />
                               Ver
@@ -260,19 +268,24 @@ const ViewPublication = () => {
                           className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            {getFileIcon(document.filename)}
+                            {getFileIcon(document?.filename)}
                             <div>
-                              <p className="font-medium text-gray-900">{document.filename}</p>
+                              <p className="font-medium text-gray-900">
+                                {document?.filename || "Documento sin nombre"}
+                              </p>
                               <p className="text-sm text-gray-500">
-                                {formatFileSize(document.size)}
+                                {formatFileSize(document?.size)}
                               </p>
                             </div>
                           </div>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleDownload(document.url, document.filename)}
+                            onClick={() =>
+                              handleDownload(document?.url, document?.filename || "documento")
+                            }
                             className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                            disabled={!document?.url}
                           >
                             <Download className="h-4 w-4 mr-1" />
                             Descargar

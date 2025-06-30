@@ -43,7 +43,7 @@ function getTokenFromPayload(payload) {
   });
   return token;
 }
-  
+
 function isRequestAjaxOrApi(req) {
   return !req.accepts("html") || req.xhr;
 }
@@ -86,7 +86,16 @@ function formatRoutes(routes) {
   }
 }
 
-
+/**
+ * Compara dos ObjectIds de manera segura
+ * @param {ObjectId|string} id1 - Primer ID
+ * @param {ObjectId|string} id2 - Segundo ID
+ * @returns {boolean} true si son iguales, false en caso contrario
+ */
+function compareObjectIds(id1, id2) {
+  if (!id1 || !id2) return false;
+  return id1.toString() === id2.toString();
+}
 
 module.exports = {
   message,
@@ -96,4 +105,5 @@ module.exports = {
   isRequestAjaxOrApi,
   getTokenFromPayload,
   formatRoutes,
+  compareObjectIds,
 };

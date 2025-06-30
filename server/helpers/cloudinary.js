@@ -5,9 +5,10 @@ const cloudinary = require("../config/cloudinary");
  * Sube una imagen a Cloudinary usando upload_stream
  * @param {Buffer} imageBuffer - Buffer de la imagen
  * @param {Object} options - Opciones adicionales para la subida
- * @returns {Promise<Object>} Resultado de la subida
+ * @param {string} originalFilename - Nombre original del archivo
+ * @returns {Promise<Object>} Resultado de la subida con información completa
  */
-function uploadImage(imageBuffer, options = {}) {
+function uploadImage(imageBuffer, options = {}, originalFilename = "image") {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
       folder: "red-horizon-portal/posts/images",
@@ -17,7 +18,22 @@ function uploadImage(imageBuffer, options = {}) {
 
     const streamUpload = cloudinary.uploader.upload_stream(uploadOptions, (err, result) => {
       if (err) return reject(err);
-      resolve(result);
+
+      // Crear objeto con información completa
+      const fileInfo = {
+        url: result.secure_url,
+        filename: originalFilename,
+        size: result.bytes,
+        mimeType: result.format ? `image/${result.format}` : "image/jpeg",
+        publicId: result.public_id,
+        format: result.format,
+        width: result.width,
+        height: result.height,
+        bytes: result.bytes,
+        secureUrl: result.secure_url,
+      };
+
+      resolve(fileInfo);
     });
 
     streamifier.createReadStream(imageBuffer).pipe(streamUpload);
@@ -28,9 +44,10 @@ function uploadImage(imageBuffer, options = {}) {
  * Sube un documento a Cloudinary usando upload_stream
  * @param {Buffer} documentBuffer - Buffer del documento
  * @param {Object} options - Opciones adicionales para la subida
- * @returns {Promise<Object>} Resultado de la subida
+ * @param {string} originalFilename - Nombre original del archivo
+ * @returns {Promise<Object>} Resultado de la subida con información completa
  */
-function uploadDocument(documentBuffer, options = {}) {
+function uploadDocument(documentBuffer, options = {}, originalFilename = "document") {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
       folder: "red-horizon-portal/posts/documents",
@@ -40,7 +57,20 @@ function uploadDocument(documentBuffer, options = {}) {
 
     const streamUpload = cloudinary.uploader.upload_stream(uploadOptions, (err, result) => {
       if (err) return reject(err);
-      resolve(result);
+
+      // Crear objeto con información completa
+      const fileInfo = {
+        url: result.secure_url,
+        filename: originalFilename,
+        size: result.bytes,
+        mimeType: result.format ? `application/${result.format}` : "application/octet-stream",
+        publicId: result.public_id,
+        format: result.format,
+        bytes: result.bytes,
+        secureUrl: result.secure_url,
+      };
+
+      resolve(fileInfo);
     });
 
     streamifier.createReadStream(documentBuffer).pipe(streamUpload);
@@ -49,13 +79,15 @@ function uploadDocument(documentBuffer, options = {}) {
 
 /**
  * Sube múltiples imágenes a Cloudinary
- * @param {Array<Buffer>} imageBuffers - Array de buffers de imágenes
+ * @param {Array<Object>} imageFiles - Array de objetos con buffer y filename
  * @param {Object} options - Opciones adicionales para la subida
- * @returns {Promise<Array<Object>>} Array de resultados de subida
+ * @returns {Promise<Array<Object>>} Array de resultados de subida con información completa
  */
-async function uploadMultipleImages(imageBuffers, options = {}) {
+async function uploadMultipleImages(imageFiles, options = {}) {
   try {
-    const uploadPromises = imageBuffers.map((buffer) => uploadImage(buffer, options));
+    const uploadPromises = imageFiles.map((file) =>
+      uploadImage(file.buffer, options, file.filename)
+    );
     return await Promise.all(uploadPromises);
   } catch (error) {
     throw new Error(`Error al subir imágenes: ${error.message}`);
@@ -64,13 +96,15 @@ async function uploadMultipleImages(imageBuffers, options = {}) {
 
 /**
  * Sube múltiples documentos a Cloudinary
- * @param {Array<Buffer>} documentBuffers - Array de buffers de documentos
+ * @param {Array<Object>} documentFiles - Array de objetos con buffer y filename
  * @param {Object} options - Opciones adicionales para la subida
- * @returns {Promise<Array<Object>>} Array de resultados de subida
+ * @returns {Promise<Array<Object>>} Array de resultados de subida con información completa
  */
-async function uploadMultipleDocuments(documentBuffers, options = {}) {
+async function uploadMultipleDocuments(documentFiles, options = {}) {
   try {
-    const uploadPromises = documentBuffers.map((buffer) => uploadDocument(buffer, options));
+    const uploadPromises = documentFiles.map((file) =>
+      uploadDocument(file.buffer, options, file.filename)
+    );
     return await Promise.all(uploadPromises);
   } catch (error) {
     throw new Error(`Error al subir documentos: ${error.message}`);
@@ -140,6 +174,15 @@ async function deleteMultipleFiles(urls, resourceType = "image") {
 }
 
 /**
+ * Determina si un archivo es un objeto completo o una URL string
+ * @param {Object|string} file - Archivo a verificar
+ * @returns {boolean} true si es un objeto completo, false si es una URL string
+ */
+function isCompleteFileObject(file) {
+  return typeof file === "object" && file !== null && file.publicId;
+}
+
+/**
  * Elimina todas las imágenes y documentos de un post
  * @param {Object} post - Objeto del post con arrays de images y documents
  * @returns {Promise<Object>} Resultado de la eliminación
@@ -154,14 +197,33 @@ async function deletePostFiles(post) {
     // Eliminar imágenes
     if (post.images && post.images.length > 0) {
       try {
-        const imageResults = await deleteMultipleFiles(post.images, "image");
+        // Usar directamente los publicId de los objetos de imagen
+        const imageDeletePromises = post.images.map((img) => {
+          // Verificar si es un objeto completo o una URL string (compatibilidad)
+          if (isCompleteFileObject(img)) {
+            return deleteFile(img.publicId, "image");
+          } else {
+            // Es una URL string (post antiguo)
+            const publicId = extractPublicIdFromUrl(img);
+            if (publicId) {
+              return deleteFile(publicId, "image");
+            } else {
+              return Promise.resolve({ result: "error", error: "No se pudo obtener publicId" });
+            }
+          }
+        });
+
+        const imageResults = await Promise.all(imageDeletePromises);
         imageResults.forEach((result, index) => {
           if (result.result === "ok" || result.deleted) {
             results.images.deleted++;
           } else {
             results.images.failed++;
+            const fileName = isCompleteFileObject(post.images[index])
+              ? post.images[index].filename || "sin nombre"
+              : `imagen_${index + 1}`;
             results.images.errors.push(
-              `Imagen ${index + 1}: ${result.error || "Error desconocido"}`
+              `Imagen ${index + 1} (${fileName}): ${result.error || "Error desconocido"}`
             );
           }
         });
@@ -174,14 +236,33 @@ async function deletePostFiles(post) {
     // Eliminar documentos
     if (post.documents && post.documents.length > 0) {
       try {
-        const documentResults = await deleteMultipleFiles(post.documents, "raw");
+        // Usar directamente los publicId de los objetos de documento
+        const documentDeletePromises = post.documents.map((doc) => {
+          // Verificar si es un objeto completo o una URL string (compatibilidad)
+          if (isCompleteFileObject(doc)) {
+            return deleteFile(doc.publicId, "raw");
+          } else {
+            // Es una URL string (post antiguo)
+            const publicId = extractPublicIdFromUrl(doc);
+            if (publicId) {
+              return deleteFile(publicId, "raw");
+            } else {
+              return Promise.resolve({ result: "error", error: "No se pudo obtener publicId" });
+            }
+          }
+        });
+
+        const documentResults = await Promise.all(documentDeletePromises);
         documentResults.forEach((result, index) => {
           if (result.result === "ok" || result.deleted) {
             results.documents.deleted++;
           } else {
             results.documents.failed++;
+            const fileName = isCompleteFileObject(post.documents[index])
+              ? post.documents[index].filename || "sin nombre"
+              : `documento_${index + 1}`;
             results.documents.errors.push(
-              `Documento ${index + 1}: ${result.error || "Error desconocido"}`
+              `Documento ${index + 1} (${fileName}): ${result.error || "Error desconocido"}`
             );
           }
         });
@@ -230,4 +311,5 @@ module.exports = {
   deleteMultipleFiles,
   deletePostFiles,
   extractPublicIdFromUrl,
+  isCompleteFileObject,
 };

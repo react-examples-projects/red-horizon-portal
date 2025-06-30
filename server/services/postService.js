@@ -1,5 +1,6 @@
-const { hashPassword } = require("../helpers/utils");
+const { hashPassword, compareObjectIds } = require("../helpers/utils");
 const { deletePostFiles } = require("../helpers/cloudinary");
+const UserModel = require("../models/User");
 
 class PostService {
   constructor() {
@@ -144,7 +145,7 @@ class PostService {
       throw new Error("Publicación no encontrada");
     }
 
-    if (existingPost.author.toString() !== authorId) {
+    if (!compareObjectIds(existingPost.author, authorId)) {
       throw new Error("No tienes permisos para editar esta publicación");
     }
 
@@ -162,7 +163,7 @@ class PostService {
       throw new Error("Publicación no encontrada");
     }
 
-    if (existingPost.author.toString() !== authorId) {
+    if (!compareObjectIds(existingPost.author, authorId)) {
       throw new Error("No tienes permisos para eliminar esta publicación");
     }
 
@@ -204,6 +205,27 @@ class PostService {
       .lean();
 
     return posts;
+  }
+
+  async getStats() {
+    // Total de posts activos
+    const totalPosts = await this.PostModel.countDocuments({ isActive: true });
+    // Total de posts creados hoy
+    const startToday = new Date();
+    startToday.setHours(0, 0, 0, 0);
+    const endToday = new Date();
+    endToday.setHours(23, 59, 59, 999);
+    const postsToday = await this.PostModel.countDocuments({
+      isActive: true,
+      createdAt: { $gte: startToday, $lte: endToday },
+    });
+    // Total de usuarios registrados
+    const totalUsers = await UserModel.countDocuments();
+    return {
+      totalPosts,
+      postsToday,
+      totalUsers,
+    };
   }
 }
 

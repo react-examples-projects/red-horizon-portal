@@ -1,6 +1,11 @@
 const PostService = require("../services/postService");
-const { uploadMultipleImages, uploadMultipleDocuments } = require("../helpers/cloudinary");
+const {
+  uploadMultipleImages,
+  uploadMultipleDocuments,
+  deleteMultipleFiles,
+} = require("../helpers/cloudinary");
 const { success, error } = require("../helpers/httpResponses");
+const { compareObjectIds } = require("../helpers/utils");
 
 class PostController {
   async createPost(req, res, next) {
@@ -21,14 +26,17 @@ class PostController {
       if (req.files && req.files.images) {
         const imageFiles = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
 
-        // Extraer los buffers de las imágenes
-        const imageBuffers = imageFiles.map((file) => file.data);
+        // Preparar objetos con buffer y filename para Cloudinary
+        const imageFilesForUpload = imageFiles.map((file) => ({
+          buffer: file.data,
+          filename: file.name || `image_${Date.now()}.jpg`,
+        }));
 
         // Subir imágenes a Cloudinary
-        const uploadedImages = await uploadMultipleImages(imageBuffers);
+        const uploadedImages = await uploadMultipleImages(imageFilesForUpload);
 
-        // Guardar las URLs de las imágenes
-        postData.images = uploadedImages.map((img) => img.secure_url);
+        // Guardar la información completa de las imágenes
+        postData.images = uploadedImages;
       }
 
       // Procesar documentos si se subieron (completamente opcional)
@@ -37,14 +45,17 @@ class PostController {
           ? req.files.documents
           : [req.files.documents];
 
-        // Extraer los buffers de los documentos
-        const documentBuffers = documentFiles.map((file) => file.data);
+        // Preparar objetos con buffer y filename para Cloudinary
+        const documentFilesForUpload = documentFiles.map((file) => ({
+          buffer: file.data,
+          filename: file.name || `document_${Date.now()}.pdf`,
+        }));
 
         // Subir documentos a Cloudinary
-        const uploadedDocuments = await uploadMultipleDocuments(documentBuffers);
+        const uploadedDocuments = await uploadMultipleDocuments(documentFilesForUpload);
 
-        // Guardar las URLs de los documentos
-        postData.documents = uploadedDocuments.map((doc) => doc.secure_url);
+        // Guardar la información completa de los documentos
+        postData.documents = uploadedDocuments;
       }
 
       const post = await PostService.createPost(postData);
@@ -117,10 +128,145 @@ class PostController {
       const { title, category, description } = req.body;
       const authorId = req.user._id;
 
+      // Procesar arrays de eliminación como JSON strings o arrays
+      let imagesToDelete = [];
+      let documentsToDelete = [];
+
+      if (req.body.imagesToDelete) {
+        try {
+          // Si es un string, parsearlo como JSON
+          if (typeof req.body.imagesToDelete === "string") {
+            imagesToDelete = JSON.parse(req.body.imagesToDelete);
+          }
+          // Si ya es un array, usarlo directamente
+          else if (Array.isArray(req.body.imagesToDelete)) {
+            imagesToDelete = req.body.imagesToDelete;
+          }
+        } catch (error) {
+          console.error("Error al procesar imagesToDelete:", error);
+          imagesToDelete = [];
+        }
+      }
+
+      if (req.body.documentsToDelete) {
+        try {
+          // Si es un string, parsearlo como JSON
+          if (typeof req.body.documentsToDelete === "string") {
+            documentsToDelete = JSON.parse(req.body.documentsToDelete);
+          }
+          // Si ya es un array, usarlo directamente
+          else if (Array.isArray(req.body.documentsToDelete)) {
+            documentsToDelete = req.body.documentsToDelete;
+          }
+        } catch (error) {
+          console.error("Error al procesar documentsToDelete:", error);
+          documentsToDelete = [];
+        }
+      }
+
       const updateData = {};
       if (title) updateData.title = title;
       if (category) updateData.category = category;
       if (description) updateData.description = description;
+
+      // Obtener el post actual para manejar los archivos
+      const currentPost = await PostService.getPostById(id);
+
+      // Verificar permisos
+      if (!compareObjectIds(currentPost.author._id, authorId)) {
+        return error(res, "No tienes permisos para editar esta publicación", 403);
+      }
+
+      // Procesar eliminación de imágenes
+      if (imagesToDelete.length > 0) {
+        const imagesToRemove = currentPost.images.filter((img) =>
+          imagesToDelete.includes(img._id.toString())
+        );
+
+        if (imagesToRemove.length > 0) {
+          // Eliminar archivos de Cloudinary
+          const imageUrls = imagesToRemove.map((img) =>
+            typeof img === "string" ? img : img.url || img.secureUrl
+          );
+
+          try {
+            await deleteMultipleFiles(imageUrls, "image");
+            console.log(`Eliminadas ${imageUrls.length} imágenes de Cloudinary`);
+          } catch (error) {
+            console.error("Error al eliminar imágenes de Cloudinary:", error);
+          }
+        }
+
+        // Filtrar las imágenes que se van a mantener
+        updateData.images = currentPost.images.filter(
+          (img) => !imagesToDelete.includes(img._id.toString())
+        );
+      }
+
+      // Procesar eliminación de documentos
+      if (documentsToDelete.length > 0) {
+        const documentsToRemove = currentPost.documents.filter((doc) =>
+          documentsToDelete.includes(doc._id.toString())
+        );
+
+        if (documentsToRemove.length > 0) {
+          // Eliminar archivos de Cloudinary
+          const documentUrls = documentsToRemove.map((doc) =>
+            typeof doc === "string" ? doc : doc.url || doc.secureUrl
+          );
+
+          try {
+            await deleteMultipleFiles(documentUrls, "raw");
+            console.log(`Eliminados ${documentUrls.length} documentos de Cloudinary`);
+          } catch (error) {
+            console.error("Error al eliminar documentos de Cloudinary:", error);
+          }
+        }
+
+        // Filtrar los documentos que se van a mantener
+        updateData.documents = currentPost.documents.filter(
+          (doc) => !documentsToDelete.includes(doc._id.toString())
+        );
+      }
+
+      // Procesar nuevas imágenes si se subieron
+      if (req.files && req.files.images) {
+        const imageFiles = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+
+        // Preparar objetos con buffer y filename para Cloudinary
+        const imageFilesForUpload = imageFiles.map((file) => ({
+          buffer: file.data,
+          filename: file.name || `image_${Date.now()}.jpg`,
+        }));
+
+        // Subir nuevas imágenes a Cloudinary
+        const uploadedImages = await uploadMultipleImages(imageFilesForUpload);
+
+        // Agregar las nuevas imágenes a las existentes
+        updateData.images = [...(updateData.images || currentPost.images), ...uploadedImages];
+      }
+
+      // Procesar nuevos documentos si se subieron
+      if (req.files && req.files.documents) {
+        const documentFiles = Array.isArray(req.files.documents)
+          ? req.files.documents
+          : [req.files.documents];
+
+        // Preparar objetos con buffer y filename para Cloudinary
+        const documentFilesForUpload = documentFiles.map((file) => ({
+          buffer: file.data,
+          filename: file.name || `document_${Date.now()}.pdf`,
+        }));
+
+        // Subir nuevos documentos a Cloudinary
+        const uploadedDocuments = await uploadMultipleDocuments(documentFilesForUpload);
+
+        // Agregar los nuevos documentos a los existentes
+        updateData.documents = [
+          ...(updateData.documents || currentPost.documents),
+          ...uploadedDocuments,
+        ];
+      }
 
       const post = await PostService.updatePost({
         id,
@@ -172,6 +318,15 @@ class PostController {
       const { category } = req.params;
       const posts = await PostService.getPostsByCategory(category);
       success(res, posts);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getStats(req, res, next) {
+    try {
+      const stats = await PostService.getStats();
+      success(res, stats);
     } catch (err) {
       next(err);
     }

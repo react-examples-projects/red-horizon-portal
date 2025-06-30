@@ -17,6 +17,10 @@ router.get(
   validate(getPostsByCategorySchemaValidation),
   postController.getPostsByCategory
 );
+
+// Ruta privada de estadísticas (protegida individualmente)
+router.get("/stats", existsToken, postController.getStats);
+
 router.get("/:id", validate(requireIdValidation), postController.getPostById);
 
 // Ruta específica para posts públicos (más descriptiva)

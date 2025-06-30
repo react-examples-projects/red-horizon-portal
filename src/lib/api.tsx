@@ -164,6 +164,57 @@ export const updatePost = async (
   return response.data?.data;
 };
 
+export const updatePostWithFiles = async (
+  id: string,
+  postData: {
+    title?: string;
+    description?: string;
+    category?: string;
+    images?: File[];
+    documents?: File[];
+    imagesToDelete?: string[];
+    documentsToDelete?: string[];
+  }
+) => {
+  const formData = new FormData();
+
+  // Agregar datos básicos
+  if (postData.title) formData.append("title", postData.title);
+  if (postData.description) formData.append("description", postData.description);
+  if (postData.category) formData.append("category", postData.category);
+
+  // Agregar nuevas imágenes si existen
+  if (postData.images && postData.images.length > 0) {
+    postData.images.forEach((image) => {
+      formData.append("images", image);
+    });
+  }
+
+  // Agregar nuevos documentos si existen
+  if (postData.documents && postData.documents.length > 0) {
+    postData.documents.forEach((document) => {
+      formData.append("documents", document);
+    });
+  }
+
+  // Agregar IDs de imágenes a eliminar como JSON string
+  if (postData.imagesToDelete && postData.imagesToDelete.length > 0) {
+    formData.append("imagesToDelete", JSON.stringify(postData.imagesToDelete));
+  }
+
+  // Agregar IDs de documentos a eliminar como JSON string
+  if (postData.documentsToDelete && postData.documentsToDelete.length > 0) {
+    formData.append("documentsToDelete", JSON.stringify(postData.documentsToDelete));
+  }
+
+  const response = await axiosInstance.patch(`/posts/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data?.data;
+};
+
 export const deletePost = async (id: string) => {
   const response = await axiosInstance.delete(`/posts/${id}`);
   return response.data?.data;
@@ -177,5 +228,11 @@ export const getMyPosts = async () => {
 // Public API requests (sin autenticación)
 export const getPublicPostById = async (id: string) => {
   const response = await axiosInstance.get(`/posts/public/${id}`);
+  return response.data?.data;
+};
+
+// Stats API request
+export const getPostsStats = async () => {
+  const response = await axiosInstance.get("/posts/stats");
   return response.data?.data;
 };

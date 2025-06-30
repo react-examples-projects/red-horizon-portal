@@ -24,7 +24,20 @@ const PostSchema = new Schema(
       trim: true,
     },
     images: {
-      type: [String],
+      type: [
+        {
+          url: { type: String, required: true },
+          filename: { type: String, required: true },
+          size: { type: Number, required: true },
+          mimeType: { type: String, required: true },
+          publicId: { type: String, required: true },
+          format: { type: String },
+          width: { type: Number },
+          height: { type: Number },
+          bytes: { type: Number },
+          secureUrl: { type: String, required: true },
+        },
+      ],
       default: [],
       validate: {
         validator: function (images) {
@@ -34,7 +47,18 @@ const PostSchema = new Schema(
       },
     },
     documents: {
-      type: [String],
+      type: [
+        {
+          url: { type: String, required: true },
+          filename: { type: String, required: true },
+          size: { type: Number, required: true },
+          mimeType: { type: String, required: true },
+          publicId: { type: String, required: true },
+          format: { type: String },
+          bytes: { type: Number },
+          secureUrl: { type: String, required: true },
+        },
+      ],
       default: [],
       validate: {
         validator: function (documents) {

@@ -7,8 +7,10 @@ import {
   getPublicPostById,
   createPost,
   updatePost,
+  updatePostWithFiles,
   deletePost,
   getMyPosts,
+  getPostsStats,
 } from "@/lib/api";
 import { Publication } from "@/types/Publication";
 
@@ -25,6 +27,7 @@ export const postKeys = {
   byCategory: (category: string) => [...postKeys.all, "category", category] as const,
   byAuthor: (authorId: string) => [...postKeys.all, "author", authorId] as const,
   infinite: () => [...postKeys.all, "infinite"] as const,
+  stats: () => [...postKeys.all, "stats"] as const,
 };
 
 // Hooks para obtener datos
@@ -112,6 +115,17 @@ export const useGetMyPosts = () => {
   });
 };
 
+export const useGetPostsStats = () => {
+  return useQuery({
+    queryKey: postKeys.stats(),
+    queryFn: getPostsStats,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+};
+
 // Hooks para mutaciones
 export const useCreatePost = () => {
   const queryClient = useQueryClient();
@@ -123,6 +137,7 @@ export const useCreatePost = () => {
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       queryClient.invalidateQueries({ queryKey: postKeys.myPosts() });
       queryClient.invalidateQueries({ queryKey: postKeys.infinite() });
+      queryClient.invalidateQueries({ queryKey: postKeys.stats() });
     },
   });
 };
@@ -139,6 +154,24 @@ export const useUpdatePost = () => {
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       queryClient.invalidateQueries({ queryKey: postKeys.myPosts() });
       queryClient.invalidateQueries({ queryKey: postKeys.infinite() });
+      queryClient.invalidateQueries({ queryKey: postKeys.stats() });
+    },
+  });
+};
+
+export const useUpdatePostWithFiles = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => updatePostWithFiles(id, data),
+    onSuccess: (data, variables) => {
+      // Actualizar el post específico en el cache
+      queryClient.setQueryData(postKeys.detail(variables.id), data);
+      // Invalidar listas relacionadas
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: postKeys.myPosts() });
+      queryClient.invalidateQueries({ queryKey: postKeys.infinite() });
+      queryClient.invalidateQueries({ queryKey: postKeys.stats() });
     },
   });
 };
@@ -155,6 +188,7 @@ export const useDeletePost = () => {
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       queryClient.invalidateQueries({ queryKey: postKeys.myPosts() });
       queryClient.invalidateQueries({ queryKey: postKeys.infinite() });
+      queryClient.invalidateQueries({ queryKey: postKeys.stats() });
     },
   });
 };

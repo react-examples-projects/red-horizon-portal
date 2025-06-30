@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import useSession from "@/hooks/useSession";
-import { useGetInfinitePosts, useDeletePost } from "@/hooks/usePosts";
+import { useGetInfinitePosts, useDeletePost, useGetPostsStats } from "@/hooks/usePosts";
 import HtmlContent from "@/components/ui/html-content";
 import NoResults from "@/components/ui/no-results";
 import SearchHelp from "@/components/ui/search-help";
@@ -68,6 +68,9 @@ const AdminDashboard = () => {
     });
 
   const deletePostMutation = useDeletePost();
+
+  // Hook para obtener estadísticas
+  const { data: statsData, isLoading: isLoadingStats } = useGetPostsStats();
 
   // Observer para infinite scroll
   const observer = useRef<IntersectionObserver>();
@@ -243,7 +246,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card className="border-blue-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-blue-700">
@@ -253,9 +256,13 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-900">
-                {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : allPublications.length}
+                {isLoadingStats ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  statsData?.totalPosts || 0
+                )}
               </div>
-              <p className="text-xs text-blue-600">Tus publicaciones</p>
+              <p className="text-xs text-blue-600">Todas las publicaciones</p>
             </CardContent>
           </Card>
 
@@ -267,32 +274,33 @@ const AdminDashboard = () => {
               <Users className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-900">248</div>
-              <p className="text-xs text-green-600">+12 este mes</p>
+              <div className="text-2xl font-bold text-green-900">
+                {isLoadingStats ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  statsData?.totalUsers || 0
+                )}
+              </div>
+              <p className="text-xs text-green-600">Total de usuarios</p>
             </CardContent>
           </Card>
 
           <Card className="border-purple-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-purple-700">
-                Eventos Programados
+                Publicaciones Hoy
               </CardTitle>
               <Calendar className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-900">5</div>
-              <p className="text-xs text-purple-600">próximos 30 días</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-red-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-red-700">Visualizaciones</CardTitle>
-              <TrendingUp className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-900">1,234</div>
-              <p className="text-xs text-red-600">+18% vs mes anterior</p>
+              <div className="text-2xl font-bold text-purple-900">
+                {isLoadingStats ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  statsData?.postsToday || 0
+                )}
+              </div>
+              <p className="text-xs text-purple-600">Creadas hoy</p>
             </CardContent>
           </Card>
         </div>
