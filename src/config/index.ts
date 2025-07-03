@@ -4,6 +4,7 @@ import Login from "@/pages/Login";
 import ForgotPassword from "@/pages/ForgotPassword";
 import Publications from "@/pages/Publications";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminHome from "@/pages/AdminHome";
 import CreatePublication from "@/pages/CreatePublication";
 import EditPublication from "@/pages/EditPublication";
 import ViewPublication from "@/pages/ViewPublication";
@@ -14,6 +15,7 @@ import NotFound from "@/pages/NotFound";
 const routes = [
   privateRoute(Publications, "/publicaciones"),
   privateRoute(AdminDashboard, "/admin"),
+  privateRoute(AdminHome, "/admin/home"),
   privateRoute(CreatePublication, "/admin/crear-publicacion"),
   privateRoute(EditPublication, "/admin/editar-publicacion/:id"),
   privateRoute(ViewPublication, "/admin/publicacion/:id"),

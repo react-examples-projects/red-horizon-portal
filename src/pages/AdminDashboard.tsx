@@ -305,6 +305,50 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
+        {/* Home Content Management */}
+        <Card className="border-orange-100 mb-8">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-orange-700">Gestión del Contenido Home</CardTitle>
+                <CardDescription>
+                  Administra los textos, imágenes y contenido de la página principal
+                </CardDescription>
+              </div>
+              <Link to="/admin/home">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar Home
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <FileText className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <h4 className="font-medium text-orange-800">Sección Hero</h4>
+                <p className="text-sm text-orange-600">Títulos y descripción principal</p>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <TrendingUp className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <h4 className="font-medium text-orange-800">Características</h4>
+                <p className="text-sm text-orange-600">Tarjetas de servicios</p>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <FileText className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <h4 className="font-medium text-orange-800">Descargas</h4>
+                <p className="text-sm text-orange-600">Archivos y enlaces</p>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <Eye className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <h4 className="font-medium text-orange-800">Galería</h4>
+                <p className="text-sm text-orange-600">Imágenes de la urbanización</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Publications Management */}
         <Card className="border-red-100">
           <CardHeader>

@@ -203,11 +203,15 @@ const Publications = () => {
         {!isLoading && (
           <>
             {allPublications.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
                 {allPublications.map((publication, index) => {
                   const isLast = index === allPublications.length - 1;
                   return (
-                    <div key={publication._id} ref={isLast ? lastElementRef : undefined}>
+                    <div
+                      key={publication._id}
+                      ref={isLast ? lastElementRef : undefined}
+                      className="break-inside-avoid mb-6"
+                    >
                       <PublicationCard publication={publication} onView={handleViewPublication} />
                     </div>
                   );

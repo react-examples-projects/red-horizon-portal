@@ -19,6 +19,7 @@ import SearchHelp from "@/components/ui/search-help";
 import ActiveFilters from "@/components/ui/active-filters";
 import { createTextPreview } from "@/lib/utils";
 import { Search, Filter, Calendar, User, Loader2, X, ArrowLeft } from "lucide-react";
+import { PublicPostCard } from "@/components/PublicPostCard";
 
 const PublicPublications = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -264,54 +265,22 @@ const PublicPublications = () => {
 
         {/* Publications Grid */}
         {!isLoading && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <>
             {allPublications.length > 0 ? (
-              allPublications.map((publication, index) => {
-                const isLast = index === allPublications.length - 1;
-                return (
-                  <div
-                    key={publication._id}
-                    ref={isLast ? lastElementRef : undefined}
-                    className="group"
-                  >
-                    <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge className={getCategoryColor(publication.category)}>
-                            {getCategoryLabel(publication.category)}
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            {formatDate(publication.createdAt)}
-                          </span>
-                        </div>
-                        <CardTitle className="text-lg line-clamp-2 group-hover:text-red-600 transition-colors duration-200">
-                          <Link to={`/post/${publication._id}`}>{publication.title}</Link>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <CardDescription className="line-clamp-3 mb-4">
-                          <HtmlContent
-                            content={createTextPreview(publication.description, 120)}
-                            className="text-sm"
-                          />
-                        </CardDescription>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            <span>{publication.author.name}</span>
-                          </div>
-                          <Link
-                            to={`/post/${publication._id}`}
-                            className="text-red-600 hover:text-red-700 font-medium"
-                          >
-                            Leer más
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                );
-              })
+              <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                {allPublications.map((publication, index) => {
+                  const isLast = index === allPublications.length - 1;
+                  return (
+                    <div
+                      key={publication._id}
+                      ref={isLast ? lastElementRef : undefined}
+                      className="break-inside-avoid mb-6"
+                    >
+                      <PublicPostCard post={publication} />
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
               <div className="col-span-full">
                 <NoResults
@@ -322,7 +291,7 @@ const PublicPublications = () => {
                 />
               </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Loading more indicator */}

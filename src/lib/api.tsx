@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getToken, isValidToken, removeToken } from "./token";
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api`,
   headers: {
     "Content-Type": "application/json; charset=utf-8",
