@@ -17,8 +17,9 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
-const ICONS: Record<string, any> = {
+const ICONS: Record<string, LucideIcon> = {
   BookCopy,
   FileText,
   Users,
@@ -34,6 +35,7 @@ const Index = () => {
 
   // Hook para obtener el contenido dinámico del Home
   const { data: homeContent, isLoading: isLoadingHome, error } = useGetHomeContent();
+  console.log(homeContent);
 
   if (isLoadingHome) {
     return (

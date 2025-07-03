@@ -49,8 +49,6 @@ export const useGetLatestPosts = (limit: number = 10) => {
   return useQuery({
     queryKey: [...postKeys.lists(), "latest", limit],
     queryFn: () => getAllPosts({ limit, page: 1 }),
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -163,7 +161,21 @@ export const useUpdatePostWithFiles = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => updatePostWithFiles(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: {
+        title?: string;
+        description?: string;
+        category?: string;
+        images?: File[];
+        documents?: File[];
+        imagesToDelete?: string[];
+        documentsToDelete?: string[];
+      };
+    }) => updatePostWithFiles(id, data),
     onSuccess: (data, variables) => {
       // Actualizar el post específico en el cache
       queryClient.setQueryData(postKeys.detail(variables.id), data);
