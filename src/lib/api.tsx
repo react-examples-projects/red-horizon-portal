@@ -272,6 +272,12 @@ export interface HomeContent {
   info: {
     title: string;
     description: string;
+    mainImage?: {
+      url: string;
+      title: string;
+      description: string;
+      publicId: string;
+    } | null;
     sections: Array<{
       id: string;
       title: string;
@@ -297,6 +303,102 @@ export const getHomeContent = async (): Promise<HomeContent> => {
 };
 
 export const updateHomeContent = async (content: HomeContent): Promise<HomeContent> => {
+  console.log("updateHomeContent - Enviando contenido:", content);
+  console.log("updateHomeContent - mainImage en contenido:", content.info.mainImage);
+
   const response = await axiosInstance.put("/home/content", content);
+  console.log("updateHomeContent - Respuesta del servidor:", response.data);
+
   return response.data;
+};
+
+// Función para subir un archivo de descarga individual
+export const uploadDownloadFile = async (
+  file: File,
+  title?: string,
+  description?: string,
+  type?: string,
+  itemId?: string
+): Promise<{
+  file: {
+    id: string;
+    title: string;
+    description: string;
+    type: string;
+    url: string;
+    size: string;
+    publicId: string;
+  };
+  content: HomeContent;
+}> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (title) formData.append("title", title);
+  if (description) formData.append("description", description);
+  if (type) formData.append("type", type);
+  if (itemId) formData.append("itemId", itemId);
+
+  const response = await axiosInstance.post("/home/admin/upload-download", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data.data;
+};
+
+// Función para subir una imagen de galería individual
+export const uploadGalleryImage = async (
+  file: File,
+  title?: string,
+  description?: string,
+  itemId?: string
+): Promise<{
+  image: {
+    id: string;
+    url: string;
+    title: string;
+    description: string;
+    publicId: string;
+  };
+  content: HomeContent;
+}> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (title) formData.append("title", title);
+  if (description) formData.append("description", description);
+  if (itemId) formData.append("itemId", itemId);
+
+  const response = await axiosInstance.post("/home/admin/upload-gallery", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data.data;
+};
+
+// Función para subir la imagen principal de la sección de información
+export const uploadInfoMainImage = async (
+  file: File,
+  title?: string,
+  description?: string
+): Promise<{
+  image: {
+    url: string;
+    title: string;
+    description: string;
+    publicId: string;
+  };
+  content: HomeContent;
+}> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (title) formData.append("title", title);
+  if (description) formData.append("description", description);
+
+  const response = await axiosInstance.post("/home/admin/upload-info-main-image", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data.data;
 };

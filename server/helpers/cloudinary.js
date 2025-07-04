@@ -301,15 +301,129 @@ function uploadVideo(videoBuffer, options = {}) {
   });
 }
 
+/**
+ * Sube una imagen de galería a Cloudinary
+ * @param {Buffer} imageBuffer - Buffer de la imagen
+ * @param {Object} options - Opciones adicionales para la subida
+ * @param {string} originalFilename - Nombre original del archivo
+ * @returns {Promise<Object>} Resultado de la subida con información completa
+ */
+function uploadGalleryImage(imageBuffer, options = {}, originalFilename = "gallery-image") {
+  return new Promise((resolve, reject) => {
+    const uploadOptions = {
+      folder: "red-horizon-portal/home/gallery",
+      resource_type: "image",
+      ...options,
+    };
+
+    const streamUpload = cloudinary.uploader.upload_stream(uploadOptions, (err, result) => {
+      if (err) return reject(err);
+
+      // Crear objeto con información completa
+      const fileInfo = {
+        url: result.secure_url,
+        filename: originalFilename,
+        size: result.bytes,
+        mimeType: result.format ? `image/${result.format}` : "image/jpeg",
+        publicId: result.public_id,
+        format: result.format,
+        width: result.width,
+        height: result.height,
+        bytes: result.bytes,
+        secureUrl: result.secure_url,
+      };
+
+      resolve(fileInfo);
+    });
+
+    streamifier.createReadStream(imageBuffer).pipe(streamUpload);
+  });
+}
+
+/**
+ * Sube un documento de descarga a Cloudinary
+ * @param {Buffer} documentBuffer - Buffer del documento
+ * @param {Object} options - Opciones adicionales para la subida
+ * @param {string} originalFilename - Nombre original del archivo
+ * @returns {Promise<Object>} Resultado de la subida con información completa
+ */
+function uploadDownloadDocument(documentBuffer, options = {}, originalFilename = "download-document") {
+  return new Promise((resolve, reject) => {
+    const uploadOptions = {
+      folder: "red-horizon-portal/home/downloads",
+      resource_type: "raw",
+      ...options,
+    };
+
+    const streamUpload = cloudinary.uploader.upload_stream(uploadOptions, (err, result) => {
+      if (err) return reject(err);
+
+      // Crear objeto con información completa
+      const fileInfo = {
+        url: result.secure_url,
+        filename: originalFilename,
+        size: result.bytes,
+        mimeType: result.format ? `application/${result.format}` : "application/octet-stream",
+        publicId: result.public_id,
+        format: result.format,
+        bytes: result.bytes,
+        secureUrl: result.secure_url,
+      };
+
+      resolve(fileInfo);
+    });
+
+    streamifier.createReadStream(documentBuffer).pipe(streamUpload);
+  });
+}
+
+/**
+ * Sube múltiples imágenes de galería a Cloudinary
+ * @param {Array<Object>} imageFiles - Array de objetos con buffer y filename
+ * @param {Object} options - Opciones adicionales para la subida
+ * @returns {Promise<Array<Object>>} Array de resultados de subida con información completa
+ */
+async function uploadMultipleGalleryImages(imageFiles, options = {}) {
+  try {
+    const uploadPromises = imageFiles.map((file) =>
+      uploadGalleryImage(file.buffer, options, file.filename)
+    );
+    return await Promise.all(uploadPromises);
+  } catch (error) {
+    throw new Error(`Error al subir imágenes de galería: ${error.message}`);
+  }
+}
+
+/**
+ * Sube múltiples documentos de descarga a Cloudinary
+ * @param {Array<Object>} documentFiles - Array de objetos con buffer y filename
+ * @param {Object} options - Opciones adicionales para la subida
+ * @returns {Promise<Array<Object>>} Array de resultados de subida con información completa
+ */
+async function uploadMultipleDownloadDocuments(documentFiles, options = {}) {
+  try {
+    const uploadPromises = documentFiles.map((file) =>
+      uploadDownloadDocument(file.buffer, options, file.filename)
+    );
+    return await Promise.all(uploadPromises);
+  } catch (error) {
+    throw new Error(`Error al subir documentos de descarga: ${error.message}`);
+  }
+}
+
 module.exports = {
   uploadImage,
   uploadDocument,
   uploadMultipleImages,
   uploadMultipleDocuments,
-  uploadVideo,
+  uploadGalleryImage,
+  uploadDownloadDocument,
+  uploadMultipleGalleryImages,
+  uploadMultipleDownloadDocuments,
   deleteFile,
   deleteMultipleFiles,
-  deletePostFiles,
   extractPublicIdFromUrl,
   isCompleteFileObject,
+  deletePostFiles,
+  uploadVideo,
 };

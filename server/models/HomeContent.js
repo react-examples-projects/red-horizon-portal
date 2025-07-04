@@ -118,6 +118,24 @@ const HomeContentSchema = new Schema(
         type: String,
         trim: true,
       },
+      mainImage: {
+        url: {
+          type: String,
+          trim: true,
+        },
+        title: {
+          type: String,
+          trim: true,
+        },
+        description: {
+          type: String,
+          trim: true,
+        },
+        publicId: {
+          type: String,
+          trim: true,
+        },
+      },
       sections: [
         {
           id: {

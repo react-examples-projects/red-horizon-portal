@@ -156,6 +156,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-8 font-inter">{info.title}</h2>
+              <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-10">{info.description}</p>
               <div className="space-y-8">
                 {info.sections.map((section) => {
                   const Icon = ICONS[section.icon] || FileText;
@@ -175,17 +176,18 @@ const Index = () => {
                 })}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              {gallery.images.slice(0, 4).map((img, idx) => (
-                <img
-                  key={img.id}
-                  src={img.url}
-                  alt={img.title}
-                  className={`rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${
-                    idx === 1 ? "mt-8" : ""
-                  } ${idx === 2 ? "-mt-8" : ""}`}
-                />
-              ))}
+            <div className="space-y-6">
+              {/* Imagen Principal */}
+              {info.mainImage && (
+                <div className="mb-8">
+                  <img
+                    src={info.mainImage.url}
+                    alt={info.mainImage.title}
+                    className="w-full h-full object-cover rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  />
+                </div>
+              )}
+
             </div>
           </div>
         </div>

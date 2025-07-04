@@ -8,13 +8,7 @@ class HomeContentService {
   async getHomeContent() {
     try {
       const content = await HomeContent.findOne({ isActive: true }).sort({ createdAt: -1 });
-
-      if (!content) {
-        // Retornar contenido por defecto si no existe
-        return this.getDefaultContent();
-      }
-
-      return content;
+      return content; // Puede ser null si no hay contenido
     } catch (error) {
       throw new Error(`Error al obtener el contenido del Home: ${error.message}`);
     }
@@ -27,24 +21,202 @@ class HomeContentService {
    */
   async createOrUpdateHomeContent(contentData) {
     try {
-      // Desactivar contenido anterior
-      await HomeContent.updateMany({}, { isActive: false });
+      console.log("createOrUpdateHomeContent - Iniciando creación/actualización");
+      console.log("createOrUpdateHomeContent - Datos recibidos:", contentData);
+      console.log("createOrUpdateHomeContent - mainImage recibido:", contentData.info?.mainImage);
+
+      // Buscar contenido activo existente
+      const existingContent = await HomeContent.findOne({ isActive: true });
 
       // Eliminar _id si viene del frontend
       if (contentData._id) {
         delete contentData._id;
       }
 
-      // Crear nuevo contenido
-      const newContent = new HomeContent({
-        ...contentData,
-        isActive: true,
-      });
+      // Asegurar que mainImage sea null si no está definido
+      if (contentData.info && contentData.info.mainImage === undefined) {
+        contentData.info.mainImage = null;
+      }
 
-      const savedContent = await newContent.save();
-      return savedContent;
+      console.log(
+        "createOrUpdateHomeContent - mainImage después de procesar:",
+        contentData.info?.mainImage
+      );
+
+      if (existingContent) {
+        // Actualizar contenido existente
+        console.log("createOrUpdateHomeContent - Actualizando contenido existente");
+        const updatedContent = await HomeContent.findByIdAndUpdate(
+          existingContent._id,
+          {
+            ...contentData,
+            isActive: true,
+            updatedAt: new Date(),
+          },
+          { new: true, runValidators: true }
+        );
+        console.log("createOrUpdateHomeContent - Contenido actualizado:", updatedContent);
+        console.log(
+          "createOrUpdateHomeContent - mainImage en contenido actualizado:",
+          updatedContent.info?.mainImage
+        );
+        return updatedContent;
+      } else {
+        // Crear nuevo contenido si no existe
+        console.log("createOrUpdateHomeContent - Creando nuevo contenido");
+        const newContent = new HomeContent({
+          ...contentData,
+          isActive: true,
+        });
+
+        const savedContent = await newContent.save();
+        console.log("createOrUpdateHomeContent - Contenido creado:", savedContent);
+        console.log(
+          "createOrUpdateHomeContent - mainImage en contenido creado:",
+          savedContent.info?.mainImage
+        );
+        return savedContent;
+      }
     } catch (error) {
       throw new Error(`Error al crear/actualizar el contenido del Home: ${error.message}`);
+    }
+  }
+
+  /**
+   * Actualiza un item específico en la sección de descargas
+   * @param {string} itemId - ID del item a actualizar
+   * @param {Object} itemData - Datos del item
+   * @returns {Promise<Object>} El contenido actualizado
+   */
+  async updateDownloadItem(itemId, itemData) {
+    try {
+      // Buscar el contenido activo
+      const currentContent = await HomeContent.findOne({ isActive: true });
+
+      if (!currentContent) {
+        throw new Error("No se encontró contenido activo");
+      }
+
+      // Buscar el item existente
+      const itemIndex = currentContent.downloads.items.findIndex((item) => item.id === itemId);
+
+      if (itemIndex !== -1) {
+        // Actualizar item existente usando $set para el array específico
+        const updateQuery = {
+          [`downloads.items.${itemIndex}`]: itemData,
+        };
+
+        const updatedContent = await HomeContent.findOneAndUpdate(
+          { _id: currentContent._id },
+          { $set: updateQuery },
+          { new: true, runValidators: false }
+        );
+
+        return updatedContent;
+      } else {
+        // Agregar nuevo item usando $push
+        const updatedContent = await HomeContent.findOneAndUpdate(
+          { _id: currentContent._id },
+          { $push: { "downloads.items": itemData } },
+          { new: true, runValidators: false }
+        );
+
+        return updatedContent;
+      }
+    } catch (error) {
+      throw new Error(`Error al actualizar item de descarga: ${error.message}`);
+    }
+  }
+
+  /**
+   * Actualiza una imagen específica en la galería
+   * @param {string} imageId - ID de la imagen a actualizar
+   * @param {Object} imageData - Datos de la imagen
+   * @returns {Promise<Object>} El contenido actualizado
+   */
+  async updateGalleryImage(imageId, imageData) {
+    try {
+      // Buscar el contenido activo
+      const currentContent = await HomeContent.findOne({ isActive: true });
+
+      if (!currentContent) {
+        throw new Error("No se encontró contenido activo");
+      }
+
+      // Buscar la imagen existente
+      const imageIndex = currentContent.gallery.images.findIndex((image) => image.id === imageId);
+
+      if (imageIndex !== -1) {
+        // Actualizar imagen existente usando $set para el array específico
+        const updateQuery = {
+          [`gallery.images.${imageIndex}`]: imageData,
+        };
+
+        const updatedContent = await HomeContent.findOneAndUpdate(
+          { _id: currentContent._id },
+          { $set: updateQuery },
+          { new: true, runValidators: false }
+        );
+
+        return updatedContent;
+      } else {
+        // Agregar nueva imagen usando $push
+        const updatedContent = await HomeContent.findOneAndUpdate(
+          { _id: currentContent._id },
+          { $push: { "gallery.images": imageData } },
+          { new: true, runValidators: false }
+        );
+
+        return updatedContent;
+      }
+    } catch (error) {
+      throw new Error(`Error al actualizar imagen de galería: ${error.message}`);
+    }
+  }
+
+  /**
+   * Actualiza la imagen principal de la sección de información
+   * @param {Object} imageData - Datos de la imagen
+   * @returns {Promise<Object>} El contenido actualizado
+   */
+  async updateInfoMainImage(imageData) {
+    try {
+      console.log("updateInfoMainImage - Iniciando actualización");
+      console.log("updateInfoMainImage - Datos de imagen recibidos:", imageData);
+
+      // Buscar el contenido activo
+      const currentContent = await HomeContent.findOne({ isActive: true });
+
+      if (!currentContent) {
+        console.log("updateInfoMainImage - No se encontró contenido activo");
+        throw new Error("No se encontró contenido activo");
+      }
+
+      console.log("updateInfoMainImage - Contenido actual encontrado:", currentContent._id);
+      console.log("updateInfoMainImage - mainImage actual:", currentContent.info.mainImage);
+
+      // Actualizar la imagen principal de la sección info
+      const updatedContent = await HomeContent.findOneAndUpdate(
+        { _id: currentContent._id },
+        {
+          $set: {
+            "info.mainImage": imageData,
+            updatedAt: new Date(),
+          },
+        },
+        { new: true, runValidators: false }
+      );
+
+      console.log("updateInfoMainImage - Contenido actualizado:", updatedContent._id);
+      console.log(
+        "updateInfoMainImage - mainImage después de actualizar:",
+        updatedContent.info.mainImage
+      );
+
+      return updatedContent;
+    } catch (error) {
+      console.error("updateInfoMainImage - Error:", error);
+      throw new Error(`Error al actualizar imagen principal de información: ${error.message}`);
     }
   }
 
@@ -149,173 +321,6 @@ class HomeContentService {
     } catch (error) {
       throw new Error(`Error al obtener estadísticas: ${error.message}`);
     }
-  }
-
-  /**
-   * Retorna el contenido por defecto
-   * @returns {Object} Contenido por defecto
-   */
-  getDefaultContent() {
-    return {
-      hero: {
-        title: "Bienvenidos a",
-        subtitle: "Aldea Universitaria Base de Misiones Che Guevara",
-        description:
-          "La Aldea Universitaria Base de Misiones Che Guevara, ubicada en Valle de la Pascua, garantiza el acceso inclusivo a la educación universitaria, formando profesionales comprometidos con el desarrollo local, enmarcados en una ética socialista y el pensamiento bolivariano.",
-        primaryButtonText: "Ver Publicaciones",
-        secondaryButtonText: "Portal Administrativo",
-      },
-      features: {
-        title: "Formación y Comunidad",
-        description:
-          "Nuestra Aldea Universitaria trabaja de la mano con las comunidades del sector Padre Chacín y zonas aledañas, promoviendo la organización popular y el desarrollo social.",
-        cards: [
-          {
-            id: "1",
-            title: "Servicios / Formación",
-            description:
-              "La Aldea Universitaria ofrece Programas Nacionales de Formación gratuitos y adaptados a las necesidades del pueblo, con enfoque social y comunitario, formando profesionales comprometidos con el desarrollo local.",
-            icon: "BookCopy",
-          },
-          {
-            id: "2",
-            title: "Documentos",
-            description:
-              "Consulta y descarga documentos esenciales como reglamentos, planes de estudio, constancias, calendarios académicos y otros recursos necesarios para el desarrollo académico.",
-            icon: "FileText",
-          },
-          {
-            id: "3",
-            title: "Comunidad",
-            description:
-              "La aldea mantiene una estrecha relación con las comunidades vecinas, promoviendo la participación activa en proyectos sociales, culturales y educativos que fortalecen el desarrollo colectivo.",
-            icon: "Users",
-          },
-        ],
-      },
-      downloads: {
-        title: "Archivos y Enlaces",
-        description: "Accede a documentos importantes y enlaces útiles para residentes",
-        items: [
-          {
-            id: "1",
-            title: "Reglamento de Convivencia 2024",
-            description: "Normativas actualizadas para la convivencia en la urbanización",
-            type: "pdf",
-            url: "/docs/reglamento-2024.pdf",
-            size: "2.5 MB",
-          },
-          {
-            id: "2",
-            title: "Manual del Propietario",
-            description: "Guía completa para nuevos residentes",
-            type: "pdf",
-            url: "/docs/manual-propietario.pdf",
-            size: "1.8 MB",
-          },
-          {
-            id: "3",
-            title: "Formulario de Solicitudes",
-            description: "Plantilla para solicitudes administrativas",
-            type: "word",
-            url: "/docs/formulario-solicitudes.docx",
-            size: "125 KB",
-          },
-          {
-            id: "4",
-            title: "Registro de Visitantes",
-            description: "Hoja de cálculo para control de visitas",
-            type: "excel",
-            url: "/docs/registro-visitantes.xlsx",
-            size: "85 KB",
-          },
-          {
-            id: "5",
-            title: "Portal de Pagos Online",
-            description: "Accede al sistema de pagos de administración",
-            type: "link",
-            url: "https://pagos.urbanizacion.com",
-          },
-          {
-            id: "6",
-            title: "Directorio de Emergencias",
-            description: "Números importantes y servicios de emergencia",
-            type: "link",
-            url: "https://emergencias.urbanizacion.com",
-          },
-        ],
-      },
-      info: {
-        title: "Información de la Urbanización",
-        description: "",
-        sections: [
-          {
-            id: "1",
-            title: "Ubicación estratégica",
-            description:
-              "Está situada al este de Valle de la Pascua, lo que facilita el acceso a la educación para estudiantes de comunidades urbanas y rurales cercanas.",
-            icon: "MapPinHouse",
-          },
-          {
-            id: "2",
-            title: "Sede educativa",
-            description:
-              "En esta urbanización se encuentra la sede de la Aldea Universitaria Base de Misiones Che Guevara, específicamente en la E.B.N. Williams Lara, lo que la convierte en un punto clave para la formación universitaria local.",
-            icon: "BookText",
-          },
-          {
-            id: "3",
-            title: "Apoyo a la inclusión",
-            description:
-              "Su cercanía y accesibilidad contribuyen significativamente a la inclusión educativa y al ascenso social de los bachilleres de la zona.",
-            icon: "UsersRound",
-          },
-        ],
-      },
-      gallery: {
-        title: "Galería de Nuestra Urbanización",
-        description:
-          "La Urbanización Padre Chacín se ubica al este de Valle de la Pascua, Estado Guárico. Es una comunidad residencial que cuenta con servicios básicos, espacios deportivos y educativos.",
-        images: [
-          {
-            id: "1",
-            url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop",
-            title: "Entrada Principal",
-            description: "Vista de la entrada principal de la urbanización",
-          },
-          {
-            id: "2",
-            url: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=600&h=400&fit=crop",
-            title: "Área de Seguridad",
-            description: "Caseta de vigilancia 24/7",
-          },
-          {
-            id: "3",
-            url: "https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=600&h=400&fit=crop",
-            title: "Jardines",
-            description: "Espacios verdes y áreas de recreación",
-          },
-          {
-            id: "4",
-            url: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop",
-            title: "Áreas Comunes",
-            description: "Salón de eventos y reuniones",
-          },
-          {
-            id: "5",
-            url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop",
-            title: "Parque Infantil",
-            description: "Área de juegos para niños",
-          },
-          {
-            id: "6",
-            url: "https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=600&h=400&fit=crop",
-            title: "Piscina Comunitaria",
-            description: "Área de piscina y recreación acuática",
-          },
-        ],
-      },
-    };
   }
 }
 

@@ -14,9 +14,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, X, Loader2, Save } from "lucide-react";
+import { ArrowLeft, X, Loader2, Save, Upload, FileText, Image, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useGetHomeContent, useUpdateHomeContent, HomeContent } from "@/hooks/useHomeContent";
+import {
+  useGetHomeContent,
+  useUpdateHomeContent,
+  useUploadDownloadFile,
+  useUploadGalleryImage,
+  useUploadInfoMainImage,
+  HomeContent,
+} from "@/hooks/useHomeContent";
 
 const AdminHome = () => {
   const navigate = useNavigate();
@@ -25,167 +32,40 @@ const AdminHome = () => {
   // Hooks para manejar el contenido del Home
   const { data: homeContent, isLoading: isLoadingContent, error } = useGetHomeContent();
   const updateHomeContentMutation = useUpdateHomeContent();
+  const uploadDownloadFileMutation = useUploadDownloadFile();
+  const uploadGalleryImageMutation = useUploadGalleryImage();
+  const uploadInfoMainImageMutation = useUploadInfoMainImage();
 
-  const [content, setContent] = useState<HomeContent>({
-    hero: {
-      title: "Bienvenidos a",
-      subtitle: "Aldea Universitaria Base de Misiones Che Guevara",
-      description:
-        "La Aldea Universitaria Base de Misiones Che Guevara, ubicada en Valle de la Pascua, garantiza el acceso inclusivo a la educación universitaria, formando profesionales comprometidos con el desarrollo local, enmarcados en una ética socialista y el pensamiento bolivariano.",
-      primaryButtonText: "Ver Publicaciones",
-      secondaryButtonText: "Portal Administrativo",
-    },
-    features: {
-      title: "Formación y Comunidad",
-      description:
-        "Nuestra Aldea Universitaria trabaja de la mano con las comunidades del sector Padre Chacín y zonas aledañas, promoviendo la organización popular y el desarrollo social.",
-      cards: [
-        {
-          id: "1",
-          title: "Servicios / Formación",
-          description:
-            "La Aldea Universitaria ofrece Programas Nacionales de Formación gratuitos y adaptados a las necesidades del pueblo, con enfoque social y comunitario, formando profesionales comprometidos con el desarrollo local.",
-          icon: "BookCopy",
-        },
-        {
-          id: "2",
-          title: "Documentos",
-          description:
-            "Consulta y descarga documentos esenciales como reglamentos, planes de estudio, constancias, calendarios académicos y otros recursos necesarios para el desarrollo académico.",
-          icon: "FileText",
-        },
-        {
-          id: "3",
-          title: "Comunidad",
-          description:
-            "La aldea mantiene una estrecha relación con las comunidades vecinas, promoviendo la participación activa en proyectos sociales, culturales y educativos que fortalecen el desarrollo colectivo.",
-          icon: "Users",
-        },
-      ],
-    },
-    downloads: {
-      title: "Archivos y Enlaces",
-      description: "Accede a documentos importantes y enlaces útiles para residentes",
-      items: [
-        {
-          id: "1",
-          title: "Reglamento de Convivencia 2024",
-          description: "Normativas actualizadas para la convivencia en la urbanización",
-          type: "pdf",
-          url: "/docs/reglamento-2024.pdf",
-          size: "2.5 MB",
-        },
-        {
-          id: "2",
-          title: "Manual del Propietario",
-          description: "Guía completa para nuevos residentes",
-          type: "pdf",
-          url: "/docs/manual-propietario.pdf",
-          size: "1.8 MB",
-        },
-        {
-          id: "3",
-          title: "Formulario de Solicitudes",
-          description: "Plantilla para solicitudes administrativas",
-          type: "word",
-          url: "/docs/formulario-solicitudes.docx",
-          size: "125 KB",
-        },
-        {
-          id: "4",
-          title: "Registro de Visitantes",
-          description: "Hoja de cálculo para control de visitas",
-          type: "excel",
-          url: "/docs/registro-visitantes.xlsx",
-          size: "85 KB",
-        },
-        {
-          id: "5",
-          title: "Portal de Pagos Online",
-          description: "Accede al sistema de pagos de administración",
-          type: "link",
-          url: "https://pagos.urbanizacion.com",
-        },
-        {
-          id: "6",
-          title: "Directorio de Emergencias",
-          description: "Números importantes y servicios de emergencia",
-          type: "link",
-          url: "https://emergencias.urbanizacion.com",
-        },
-      ],
-    },
-    info: {
-      title: "Información de la Urbanización",
-      description: "",
-      sections: [
-        {
-          id: "1",
-          title: "Ubicación estratégica",
-          description:
-            "Está situada al este de Valle de la Pascua, lo que facilita el acceso a la educación para estudiantes de comunidades urbanas y rurales cercanas.",
-          icon: "MapPinHouse",
-        },
-        {
-          id: "2",
-          title: "Sede educativa",
-          description:
-            "En esta urbanización se encuentra la sede de la Aldea Universitaria Base de Misiones Che Guevara, específicamente en la E.B.N. Williams Lara, lo que la convierte en un punto clave para la formación universitaria local.",
-          icon: "BookText",
-        },
-        {
-          id: "3",
-          title: "Apoyo a la inclusión",
-          description:
-            "Su cercanía y accesibilidad contribuyen significativamente a la inclusión educativa y al ascenso social de los bachilleres de la zona.",
-          icon: "UsersRound",
-        },
-      ],
-    },
-    gallery: {
-      title: "Galería de Nuestra Urbanización",
-      description:
-        "La Urbanización Padre Chacín se ubica al este de Valle de la Pascua, Estado Guárico. Es una comunidad residencial que cuenta con servicios básicos, espacios deportivos y educativos.",
-      images: [
-        {
-          id: "1",
-          url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop",
-          title: "Entrada Principal",
-          description: "Vista de la entrada principal de la urbanización",
-        },
-        {
-          id: "2",
-          url: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=600&h=400&fit=crop",
-          title: "Área de Seguridad",
-          description: "Caseta de vigilancia 24/7",
-        },
-        {
-          id: "3",
-          url: "https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=600&h=400&fit=crop",
-          title: "Jardines",
-          description: "Espacios verdes y áreas de recreación",
-        },
-        {
-          id: "4",
-          url: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600&h=400&fit=crop",
-          title: "Áreas Comunes",
-          description: "Salón de eventos y reuniones",
-        },
-        {
-          id: "5",
-          url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop",
-          title: "Parque Infantil",
-          description: "Área de juegos para niños",
-        },
-        {
-          id: "6",
-          url: "https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=600&h=400&fit=crop",
-          title: "Piscina Comunitaria",
-          description: "Área de piscina y recreación acuática",
-        },
-      ],
-    },
-  });
+  // Estados para archivos por item - Separados por tipo
+  const [uploadingDownloads, setUploadingDownloads] = useState<{
+    [key: string]: {
+      file: File | null;
+      title: string;
+      description: string;
+      type?: string;
+      size?: string;
+    };
+  }>({});
+
+  const [uploadingGalleryImages, setUploadingGalleryImages] = useState<{
+    [key: string]: {
+      file: File | null;
+      title: string;
+      description: string;
+      type?: string;
+      size?: string;
+    };
+  }>({});
+
+  const [uploadingInfoMainImage, setUploadingInfoMainImage] = useState<{
+    file: File | null;
+    title: string;
+    description: string;
+    type?: string;
+    size?: string;
+  } | null>(null);
+
+  const [content, setContent] = useState<HomeContent | null>(null);
 
   // Cargar contenido cuando se obtiene del servidor
   useEffect(() => {
@@ -194,13 +74,148 @@ const AdminHome = () => {
     }
   }, [homeContent]);
 
+  // Función para crear contenido inicial
+  const createInitialContent = () => {
+    const initialContent: HomeContent = {
+      hero: {
+        title: "",
+        subtitle: "",
+        description: "",
+        primaryButtonText: "",
+        secondaryButtonText: "",
+      },
+      features: {
+        title: "",
+        description: "",
+        cards: [],
+      },
+      downloads: {
+        title: "",
+        description: "",
+        items: [],
+      },
+      info: {
+        title: "",
+        description: "",
+        mainImage: null,
+        sections: [],
+      },
+      gallery: {
+        title: "",
+        description: "",
+        images: [],
+      },
+    };
+    setContent(initialContent);
+  };
+
   const handleSave = async () => {
     try {
-      await updateHomeContentMutation.mutateAsync(content);
+      if (!content) {
+        toast({
+          title: "Error",
+          description: "No hay contenido para guardar",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Obtener los IDs de items que realmente existen en el contenido actual
+      const existingDownloadIds = new Set(content.downloads.items.map((item) => item.id));
+      const existingGalleryIds = new Set(content.gallery.images.map((image) => image.id));
+
+      // Filtrar archivos de descarga que pertenecen a items existentes
+      const validDownloadPromises = Object.entries(uploadingDownloads)
+        .filter(([itemId, item]) => existingDownloadIds.has(itemId) && item?.file)
+        .map(async ([itemId, item]) => {
+          const result = await uploadDownloadFileMutation.mutateAsync({
+            file: item.file,
+            title: item.title,
+            description: item.description,
+            type: item.type || "pdf",
+            itemId,
+          });
+          console.log("handleSave - Archivo de descarga subido:", result);
+          return result;
+        });
+
+      // Filtrar imágenes de galería que pertenecen a items existentes
+      const validGalleryPromises = Object.entries(uploadingGalleryImages)
+        .filter(([itemId, item]) => existingGalleryIds.has(itemId) && item?.file)
+        .map(async ([itemId, item]) => {
+          const result = await uploadGalleryImageMutation.mutateAsync({
+            file: item.file,
+            title: item.title,
+            description: item.description,
+            itemId,
+          });
+          console.log("handleSave - Imagen de galería subida:", result);
+          return result;
+        });
+
+      // Subir imagen principal de información si existe
+      console.log("handleSave - Verificando imagen principal:", uploadingInfoMainImage);
+      let uploadedMainImage = null;
+
+      if (uploadingInfoMainImage?.file) {
+        const result = await uploadInfoMainImageMutation.mutateAsync({
+          file: uploadingInfoMainImage.file,
+          title: uploadingInfoMainImage.title,
+          description: uploadingInfoMainImage.description,
+        });
+        uploadedMainImage = result.image;
+        console.log("handleSave - Imagen principal subida:", uploadedMainImage);
+      }
+
+      // Esperar a que se suban todos los archivos válidos
+      const uploadResults = await Promise.all([...validDownloadPromises, ...validGalleryPromises]);
+      console.log("handleSave - Resultados de subida:", uploadResults);
+
+      // Obtener el contenido más reciente después de las subidas
+      let updatedContent = content;
+
+      // Si se subió imagen principal, actualizar el contenido
+      if (uploadedMainImage) {
+        updatedContent = {
+          ...updatedContent,
+          info: {
+            ...updatedContent.info,
+            mainImage: uploadedMainImage,
+          },
+        };
+        console.log(
+          "handleSave - Contenido actualizado con imagen principal:",
+          updatedContent.info.mainImage
+        );
+      }
+
+      // Si se subieron archivos, usar el contenido actualizado del último resultado
+      if (uploadResults.length > 0) {
+        const lastResult = uploadResults[uploadResults.length - 1];
+        if (lastResult && lastResult.content) {
+          updatedContent = lastResult.content;
+          console.log("handleSave - Usando contenido actualizado de subida:", updatedContent);
+        }
+      }
+
+      // Luego guardar el contenido
+      console.log("handleSave - Contenido a guardar:", updatedContent);
+      console.log("handleSave - mainImage en contenido a guardar:", updatedContent.info.mainImage);
+
+      await updateHomeContentMutation.mutateAsync(updatedContent);
+
+      // Actualizar el estado local con el contenido guardado
+      setContent(updatedContent);
+      console.log("handleSave - Estado local actualizado");
+
+      // Limpiar todos los estados de subida
+      setUploadingDownloads({});
+      setUploadingGalleryImages({});
+      setUploadingInfoMainImage(null);
 
       toast({
         title: "Contenido guardado",
-        description: "Los cambios han sido guardados exitosamente",
+        description: "Los cambios y archivos han sido guardados exitosamente",
       });
     } catch (error) {
       toast({
@@ -211,18 +226,139 @@ const AdminHome = () => {
     }
   };
 
+  // Función para detectar el tipo de archivo basado en la extensión
+  const detectFileType = (filename: string): string => {
+    const extension = filename.split(".").pop()?.toLowerCase();
+    switch (extension) {
+      case "pdf":
+        return "pdf";
+      case "doc":
+      case "docx":
+        return "word";
+      case "xls":
+      case "xlsx":
+        return "excel";
+      case "txt":
+        return "txt";
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
+      case "webp":
+        return "image";
+      default:
+        return "pdf";
+    }
+  };
+
+  // Función para formatear el tamaño del archivo
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  // Funciones para manejar archivos por item
+  const handleDownloadFileChange = (itemId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const detectedType = detectFileType(file.name);
+      const fileSize = formatFileSize(file.size);
+
+      setUploadingDownloads((prev) => ({
+        ...prev,
+        [itemId]: {
+          file,
+          title: file.name.replace(/\.[^/.]+$/, ""), // Quitar la extensión del nombre
+          description: "",
+          type: detectedType,
+          size: fileSize,
+        },
+      }));
+    }
+    // Resetear el input para permitir seleccionar el mismo archivo nuevamente
+    event.target.value = "";
+  };
+
+  const handleGalleryImageChange = (itemId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const detectedType = detectFileType(file.name);
+      const fileSize = formatFileSize(file.size);
+
+      setUploadingGalleryImages((prev) => ({
+        ...prev,
+        [itemId]: {
+          file,
+          title: file.name.replace(/\.[^/.]+$/, ""), // Quitar la extensión del nombre
+          description: "",
+          type: detectedType,
+          size: fileSize,
+        },
+      }));
+    }
+    // Resetear el input para permitir seleccionar el mismo archivo nuevamente
+    event.target.value = "";
+  };
+
+  const cancelDownloadUpload = (itemId: string) => {
+    setUploadingDownloads((prev) => {
+      const newState = { ...prev };
+      delete newState[itemId];
+      return newState;
+    });
+  };
+
+  const cancelGalleryUpload = (itemId: string) => {
+    setUploadingGalleryImages((prev) => {
+      const newState = { ...prev };
+      delete newState[itemId];
+      return newState;
+    });
+  };
+
+  const handleInfoMainImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const detectedType = detectFileType(file.name);
+      const fileSize = formatFileSize(file.size);
+
+      setUploadingInfoMainImage({
+        file,
+        title: file.name.replace(/\.[^/.]+$/, ""), // Quitar la extensión del nombre
+        description: "",
+        type: detectedType,
+        size: fileSize,
+      });
+    }
+    // Resetear el input para permitir seleccionar el mismo archivo nuevamente
+    event.target.value = "";
+  };
+
+  const cancelInfoMainImageUpload = () => {
+    setUploadingInfoMainImage(null);
+  };
+
   const updateHero = (field: keyof HomeContent["hero"], value: string) => {
-    setContent((prev) => ({
-      ...prev,
-      hero: { ...prev.hero, [field]: value },
-    }));
+    setContent((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        hero: { ...prev.hero, [field]: value },
+      };
+    });
   };
 
   const updateFeatures = (field: keyof HomeContent["features"], value: string) => {
-    setContent((prev) => ({
-      ...prev,
-      features: { ...prev.features, [field]: value },
-    }));
+    setContent((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        features: { ...prev.features, [field]: value },
+      };
+    });
   };
 
   const updateFeatureCard = (id: string, field: string, value: string) => {
@@ -273,18 +409,6 @@ const AdminHome = () => {
     }));
   };
 
-  const updateDownloadItem = (id: string, field: string, value: string) => {
-    setContent((prev) => ({
-      ...prev,
-      downloads: {
-        ...prev.downloads,
-        items: prev.downloads.items.map((item) =>
-          item.id === id ? { ...item, [field]: value } : item
-        ),
-      },
-    }));
-  };
-
   const addDownloadItem = () => {
     const newId = (content.downloads.items.length + 1).toString();
     setContent((prev) => ({
@@ -298,8 +422,8 @@ const AdminHome = () => {
             title: "Nuevo archivo",
             description: "Descripción del archivo",
             type: "pdf",
-            url: "/docs/nuevo-archivo.pdf",
-            size: "1 MB",
+            url: "", // URL vacía hasta que se suba un archivo
+            size: "",
           },
         ],
       },
@@ -314,6 +438,13 @@ const AdminHome = () => {
         items: prev.downloads.items.filter((item) => item.id !== id),
       },
     }));
+
+    // Limpiar el estado de subida para este item
+    setUploadingDownloads((prev) => {
+      const newState = { ...prev };
+      delete newState[id];
+      return newState;
+    });
   };
 
   const updateInfo = (field: keyof HomeContent["info"], value: string) => {
@@ -371,38 +502,18 @@ const AdminHome = () => {
     }));
   };
 
-  const updateGalleryImage = (id: string, field: string, value: string) => {
-    setContent((prev) => ({
-      ...prev,
-      gallery: {
-        ...prev.gallery,
-        images: prev.gallery.images.map((image) =>
-          image.id === id ? { ...image, [field]: value } : image
-        ),
-      },
-    }));
-  };
-
   const addGalleryImage = () => {
     const newId = (content.gallery.images.length + 1).toString();
     setContent((prev) => ({
       ...prev,
       gallery: {
         ...prev.gallery,
-        images: [
-          ...prev.gallery.images,
-          {
-            id: newId,
-            url: "https://via.placeholder.com/600x400",
-            title: "Nueva imagen",
-            description: "Descripción de la nueva imagen",
-          },
-        ],
+        images: [...prev.gallery.images],
       },
     }));
   };
 
-  const removeGalleryImage = (id: string) => {
+  const removeGalleryImageItem = (id: string) => {
     setContent((prev) => ({
       ...prev,
       gallery: {
@@ -410,6 +521,13 @@ const AdminHome = () => {
         images: prev.gallery.images.filter((image) => image.id !== id),
       },
     }));
+
+    // Limpiar el estado de subida para este item
+    setUploadingGalleryImages((prev) => {
+      const newState = { ...prev };
+      delete newState[id];
+      return newState;
+    });
   };
 
   return (
@@ -444,523 +562,751 @@ const AdminHome = () => {
         {/* Content */}
         {!isLoadingContent && !error && (
           <>
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-4 mb-4">
-                <Button
-                  onClick={() => navigate("/admin")}
-                  variant="outline"
-                  size="sm"
-                  className="border-red-200 text-red-600 hover:bg-red-50"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Volver al Panel
-                </Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Administrar Página Home</h1>
-                  <p className="text-gray-600">Gestiona el contenido de la página principal</p>
+            {/* Estado vacío */}
+            {!content && (
+              <div className="text-center py-12">
+                <div className="max-w-md mx-auto">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                    <div className="text-gray-400 mb-4">
+                      <svg
+                        className="mx-auto h-12 w-12"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No hay contenido configurado
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Aún no se ha configurado el contenido de la página principal. Haz clic en el
+                      botón para comenzar a crear el contenido.
+                    </p>
+                    <Button
+                      onClick={createInitialContent}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Crear Contenido Inicial
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  onClick={handleSave}
-                  disabled={updateHomeContentMutation.isPending}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  {updateHomeContentMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Guardando...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Save className="w-4 h-4" />
-                      Guardar Cambios
-                    </div>
-                  )}
-                </Button>
               </div>
-            </div>
+            )}
 
-            <Tabs defaultValue="hero" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="hero">Hero</TabsTrigger>
-                <TabsTrigger value="features">Características</TabsTrigger>
-                <TabsTrigger value="downloads">Descargas</TabsTrigger>
-                <TabsTrigger value="info">Información</TabsTrigger>
-                <TabsTrigger value="gallery">Galería</TabsTrigger>
-              </TabsList>
+            {/* Contenido existente */}
+            {content && (
+              <>
+                {/* Header */}
+                <div className="mb-8">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Button
+                      onClick={() => navigate("/admin")}
+                      variant="outline"
+                      size="sm"
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Volver al Panel
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Administrar Página Home
+                      </h1>
+                      <p className="text-gray-600">Gestiona el contenido de la página principal</p>
+                    </div>
+                    <Button
+                      onClick={handleSave}
+                      disabled={updateHomeContentMutation.isPending}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      {updateHomeContentMutation.isPending ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Guardando...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Save className="w-4 h-4" />
+                          Guardar Cambios
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                </div>
 
-              {/* Hero Section */}
-              <TabsContent value="hero" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sección Hero</CardTitle>
-                    <CardDescription>Configura el contenido principal de la página</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="hero-title">Título Principal</Label>
-                        <Input
-                          id="hero-title"
-                          value={content.hero.title}
-                          onChange={(e) => updateHero("title", e.target.value)}
-                          placeholder="Título principal"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="hero-subtitle">Subtítulo</Label>
-                        <Input
-                          id="hero-subtitle"
-                          value={content.hero.subtitle}
-                          onChange={(e) => updateHero("subtitle", e.target.value)}
-                          placeholder="Subtítulo"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="hero-description">Descripción</Label>
-                      <Textarea
-                        id="hero-description"
-                        value={content.hero.description}
-                        onChange={(e) => updateHero("description", e.target.value)}
-                        placeholder="Descripción del hero"
-                        rows={4}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="hero-primary-button">Texto Botón Principal</Label>
-                        <Input
-                          id="hero-primary-button"
-                          value={content.hero.primaryButtonText}
-                          onChange={(e) => updateHero("primaryButtonText", e.target.value)}
-                          placeholder="Texto del botón principal"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="hero-secondary-button">Texto Botón Secundario</Label>
-                        <Input
-                          id="hero-secondary-button"
-                          value={content.hero.secondaryButtonText}
-                          onChange={(e) => updateHero("secondaryButtonText", e.target.value)}
-                          placeholder="Texto del botón secundario"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                <Tabs defaultValue="hero" className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="hero">Hero</TabsTrigger>
+                    <TabsTrigger value="features">Características</TabsTrigger>
+                    <TabsTrigger value="downloads">Descargas</TabsTrigger>
+                    <TabsTrigger value="info">Información</TabsTrigger>
+                    <TabsTrigger value="gallery">Galería</TabsTrigger>
+                  </TabsList>
 
-              {/* Features Section */}
-              <TabsContent value="features" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sección de Características</CardTitle>
-                    <CardDescription>Gestiona las características principales</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="features-title">Título de la Sección</Label>
-                        <Input
-                          id="features-title"
-                          value={content.features.title}
-                          onChange={(e) => updateFeatures("title", e.target.value)}
-                          placeholder="Título de la sección"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="features-description">Descripción</Label>
-                        <Input
-                          id="features-description"
-                          value={content.features.description}
-                          onChange={(e) => updateFeatures("description", e.target.value)}
-                          placeholder="Descripción de la sección"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label>Tarjetas de Características</Label>
-                        <Button onClick={addFeatureCard} variant="outline" size="sm">
-                          Agregar Tarjeta
-                        </Button>
-                      </div>
-                      {content.features.cards.map((card, index) => (
-                        <Card key={card.id} className="p-4">
-                          <div className="flex items-start justify-between mb-4">
-                            <h4 className="font-medium">Tarjeta {index + 1}</h4>
-                            <Button
-                              onClick={() => removeFeatureCard(card.id)}
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Título</Label>
-                              <Input
-                                value={card.title}
-                                onChange={(e) =>
-                                  updateFeatureCard(card.id, "title", e.target.value)
-                                }
-                                placeholder="Título de la tarjeta"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Icono</Label>
-                              <Select
-                                value={card.icon}
-                                onValueChange={(value) => updateFeatureCard(card.id, "icon", value)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="BookCopy">Libro</SelectItem>
-                                  <SelectItem value="FileText">Documento</SelectItem>
-                                  <SelectItem value="Users">Usuarios</SelectItem>
-                                  <SelectItem value="MapPinHouse">Ubicación</SelectItem>
-                                  <SelectItem value="BookText">Texto</SelectItem>
-                                  <SelectItem value="UsersRound">Usuarios Redondos</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="space-y-2 mt-4">
-                            <Label>Descripción</Label>
-                            <Textarea
-                              value={card.description}
-                              onChange={(e) =>
-                                updateFeatureCard(card.id, "description", e.target.value)
-                              }
-                              placeholder="Descripción de la característica"
-                              rows={3}
+                  {/* Hero Section */}
+                  <TabsContent value="hero" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Sección Hero</CardTitle>
+                        <CardDescription>
+                          Configura el contenido principal de la página
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="hero-title">Título Principal</Label>
+                            <Input
+                              id="hero-title"
+                              value={content.hero.title}
+                              onChange={(e) => updateHero("title", e.target.value)}
+                              placeholder="Título principal"
                             />
                           </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Downloads Section */}
-              <TabsContent value="downloads" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sección de Descargas</CardTitle>
-                    <CardDescription>Gestiona los archivos y enlaces descargables</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="downloads-title">Título de la Sección</Label>
-                        <Input
-                          id="downloads-title"
-                          value={content.downloads.title}
-                          onChange={(e) => updateDownloads("title", e.target.value)}
-                          placeholder="Título de la sección"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="downloads-description">Descripción</Label>
-                        <Input
-                          id="downloads-description"
-                          value={content.downloads.description}
-                          onChange={(e) => updateDownloads("description", e.target.value)}
-                          placeholder="Descripción de la sección"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label>Elementos Descargables</Label>
-                        <Button onClick={addDownloadItem} variant="outline" size="sm">
-                          Agregar Elemento
-                        </Button>
-                      </div>
-                      {content.downloads.items.map((item, index) => (
-                        <Card key={item.id} className="p-4">
-                          <div className="flex items-start justify-between mb-4">
-                            <h4 className="font-medium">Elemento {index + 1}</h4>
-                            <Button
-                              onClick={() => removeDownloadItem(item.id)}
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Título</Label>
-                              <Input
-                                value={item.title}
-                                onChange={(e) =>
-                                  updateDownloadItem(item.id, "title", e.target.value)
-                                }
-                                placeholder="Título del elemento"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Tipo</Label>
-                              <Select
-                                value={item.type}
-                                onValueChange={(value) =>
-                                  updateDownloadItem(item.id, "type", value)
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pdf">PDF</SelectItem>
-                                  <SelectItem value="word">Word</SelectItem>
-                                  <SelectItem value="excel">Excel</SelectItem>
-                                  <SelectItem value="link">Enlace</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div className="space-y-2">
-                              <Label>URL</Label>
-                              <Input
-                                value={item.url}
-                                onChange={(e) => updateDownloadItem(item.id, "url", e.target.value)}
-                                placeholder="URL del archivo o enlace"
-                              />
-                            </div>
-                            {item.type !== "link" && (
-                              <div className="space-y-2">
-                                <Label>Tamaño</Label>
-                                <Input
-                                  value={item.size || ""}
-                                  onChange={(e) =>
-                                    updateDownloadItem(item.id, "size", e.target.value)
-                                  }
-                                  placeholder="Tamaño del archivo"
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className="space-y-2 mt-4">
-                            <Label>Descripción</Label>
-                            <Textarea
-                              value={item.description}
-                              onChange={(e) =>
-                                updateDownloadItem(item.id, "description", e.target.value)
-                              }
-                              placeholder="Descripción del elemento"
-                              rows={2}
+                          <div className="space-y-2">
+                            <Label htmlFor="hero-subtitle">Subtítulo</Label>
+                            <Input
+                              id="hero-subtitle"
+                              value={content.hero.subtitle}
+                              onChange={(e) => updateHero("subtitle", e.target.value)}
+                              placeholder="Subtítulo"
                             />
                           </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Info Section */}
-              <TabsContent value="info" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sección de Información</CardTitle>
-                    <CardDescription>Gestiona la información de la urbanización</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="info-title">Título de la Sección</Label>
-                      <Input
-                        id="info-title"
-                        value={content.info.title}
-                        onChange={(e) => updateInfo("title", e.target.value)}
-                        placeholder="Título de la sección"
-                      />
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label>Secciones de Información</Label>
-                        <Button onClick={addInfoSection} variant="outline" size="sm">
-                          Agregar Sección
-                        </Button>
-                      </div>
-                      {content.info.sections.map((section, index) => (
-                        <Card key={section.id} className="p-4">
-                          <div className="flex items-start justify-between mb-4">
-                            <h4 className="font-medium">Sección {index + 1}</h4>
-                            <Button
-                              onClick={() => removeInfoSection(section.id)}
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="hero-description">Descripción</Label>
+                          <Textarea
+                            id="hero-description"
+                            value={content.hero.description}
+                            onChange={(e) => updateHero("description", e.target.value)}
+                            placeholder="Descripción del hero"
+                            rows={4}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="hero-primary-button">Texto Botón Principal</Label>
+                            <Input
+                              id="hero-primary-button"
+                              value={content.hero.primaryButtonText}
+                              onChange={(e) => updateHero("primaryButtonText", e.target.value)}
+                              placeholder="Texto del botón principal"
+                            />
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Título</Label>
-                              <Input
-                                value={section.title}
-                                onChange={(e) =>
-                                  updateInfoSection(section.id, "title", e.target.value)
-                                }
-                                placeholder="Título de la sección"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Icono</Label>
-                              <Select
-                                value={section.icon}
-                                onValueChange={(value) =>
-                                  updateInfoSection(section.id, "icon", value)
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="MapPinHouse">Ubicación</SelectItem>
-                                  <SelectItem value="BookText">Texto</SelectItem>
-                                  <SelectItem value="UsersRound">Usuarios</SelectItem>
-                                  <SelectItem value="BookCopy">Libro</SelectItem>
-                                  <SelectItem value="FileText">Documento</SelectItem>
-                                  <SelectItem value="Users">Usuarios</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="hero-secondary-button">Texto Botón Secundario</Label>
+                            <Input
+                              id="hero-secondary-button"
+                              value={content.hero.secondaryButtonText}
+                              onChange={(e) => updateHero("secondaryButtonText", e.target.value)}
+                              placeholder="Texto del botón secundario"
+                            />
                           </div>
-                          <div className="space-y-2 mt-4">
-                            <Label>Descripción</Label>
-                            <Textarea
-                              value={section.description}
-                              onChange={(e) =>
-                                updateInfoSection(section.id, "description", e.target.value)
-                              }
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Features Section */}
+                  <TabsContent value="features" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Sección de Características</CardTitle>
+                        <CardDescription>Gestiona las características principales</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="features-title">Título de la Sección</Label>
+                            <Input
+                              id="features-title"
+                              value={content.features.title}
+                              onChange={(e) => updateFeatures("title", e.target.value)}
+                              placeholder="Título de la sección"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="features-description">Descripción</Label>
+                            <Input
+                              id="features-description"
+                              value={content.features.description}
+                              onChange={(e) => updateFeatures("description", e.target.value)}
                               placeholder="Descripción de la sección"
-                              rows={3}
                             />
                           </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                        </div>
 
-              {/* Gallery Section */}
-              <TabsContent value="gallery" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sección de Galería</CardTitle>
-                    <CardDescription>Gestiona las imágenes de la galería</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="gallery-title">Título de la Sección</Label>
-                        <Input
-                          id="gallery-title"
-                          value={content.gallery.title}
-                          onChange={(e) => updateGallery("title", e.target.value)}
-                          placeholder="Título de la sección"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="gallery-description">Descripción</Label>
-                        <Input
-                          id="gallery-description"
-                          value={content.gallery.description}
-                          onChange={(e) => updateGallery("description", e.target.value)}
-                          placeholder="Descripción de la sección"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label>Imágenes de la Galería</Label>
-                        <Button onClick={addGalleryImage} variant="outline" size="sm">
-                          Agregar Imagen
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {content.gallery.images.map((image, index) => (
-                          <Card key={image.id} className="p-4">
-                            <div className="flex items-start justify-between mb-4">
-                              <h4 className="font-medium">Imagen {index + 1}</h4>
-                              <Button
-                                onClick={() => removeGalleryImage(image.id)}
-                                variant="outline"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <div className="space-y-4">
-                              <div className="space-y-2">
-                                <Label>URL de la Imagen</Label>
-                                <Input
-                                  value={image.url}
-                                  onChange={(e) =>
-                                    updateGalleryImage(image.id, "url", e.target.value)
-                                  }
-                                  placeholder="URL de la imagen"
-                                />
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label>Tarjetas de Características</Label>
+                            <Button onClick={addFeatureCard} variant="outline" size="sm">
+                              Agregar Tarjeta
+                            </Button>
+                          </div>
+                          {content.features.cards.map((card, index) => (
+                            <Card key={card.id} className="p-4">
+                              <div className="flex items-start justify-between mb-4">
+                                <h4 className="font-medium">Tarjeta {index + 1}</h4>
+                                <Button
+                                  onClick={() => removeFeatureCard(card.id)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
                               </div>
-                              <div className="space-y-2">
-                                <Label>Título</Label>
-                                <Input
-                                  value={image.title}
-                                  onChange={(e) =>
-                                    updateGalleryImage(image.id, "title", e.target.value)
-                                  }
-                                  placeholder="Título de la imagen"
-                                />
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label>Título</Label>
+                                  <Input
+                                    value={card.title}
+                                    onChange={(e) =>
+                                      updateFeatureCard(card.id, "title", e.target.value)
+                                    }
+                                    placeholder="Título de la tarjeta"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Icono</Label>
+                                  <Select
+                                    value={card.icon}
+                                    onValueChange={(value) =>
+                                      updateFeatureCard(card.id, "icon", value)
+                                    }
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="BookCopy">Libro</SelectItem>
+                                      <SelectItem value="FileText">Documento</SelectItem>
+                                      <SelectItem value="Users">Usuarios</SelectItem>
+                                      <SelectItem value="MapPinHouse">Ubicación</SelectItem>
+                                      <SelectItem value="BookText">Texto</SelectItem>
+                                      <SelectItem value="UsersRound">Usuarios Redondos</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
                               </div>
-                              <div className="space-y-2">
+                              <div className="space-y-2 mt-4">
                                 <Label>Descripción</Label>
                                 <Textarea
-                                  value={image.description}
+                                  value={card.description}
                                   onChange={(e) =>
-                                    updateGalleryImage(image.id, "description", e.target.value)
+                                    updateFeatureCard(card.id, "description", e.target.value)
                                   }
-                                  placeholder="Descripción de la imagen"
-                                  rows={2}
+                                  placeholder="Descripción de la característica"
+                                  rows={3}
                                 />
                               </div>
-                              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                            </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Downloads Section */}
+                  <TabsContent value="downloads" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Sección de Descargas</CardTitle>
+                        <CardDescription>
+                          Gestiona los archivos y enlaces descargables
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="downloads-title">Título de la Sección</Label>
+                            <Input
+                              id="downloads-title"
+                              value={content.downloads.title}
+                              onChange={(e) => updateDownloads("title", e.target.value)}
+                              placeholder="Título de la sección"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="downloads-description">Descripción</Label>
+                            <Input
+                              id="downloads-description"
+                              value={content.downloads.description}
+                              onChange={(e) => updateDownloads("description", e.target.value)}
+                              placeholder="Descripción de la sección"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label>Elementos Descargables</Label>
+                            <Button onClick={addDownloadItem} variant="outline" size="sm">
+                              Agregar Elemento
+                            </Button>
+                          </div>
+                          {content.downloads.items.map((item, index) => (
+                            <Card key={item.id} className="p-4">
+                              <div className="flex items-start justify-between mb-4">
+                                <h4 className="font-medium">Elemento {index + 1}</h4>
+                                <div className="flex gap-2">
+                                  {/* Botón de subida de archivo */}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-blue-600 hover:text-blue-700"
+                                    onClick={() => {
+                                      const input = document.getElementById(
+                                        `download-file-${item.id}`
+                                      ) as HTMLInputElement;
+                                      if (input) input.click();
+                                    }}
+                                  >
+                                    <Upload className="h-4 w-4 mr-1" />
+                                    Subir Archivo
+                                  </Button>
+                                  <Input
+                                    id={`download-file-${item.id}`}
+                                    type="file"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+                                    onChange={(e) => handleDownloadFileChange(item.id, e)}
+                                    className="hidden"
+                                  />
+                                  <Button
+                                    onClick={() => removeDownloadItem(item.id)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Formulario de subida si hay archivo seleccionado */}
+                              {uploadingDownloads[item.id]?.file && (
+                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex-1">
+                                      <p className="text-sm font-medium text-blue-800">
+                                        Archivo: {uploadingDownloads[item.id].file?.name}
+                                      </p>
+                                      <p className="text-xs text-blue-600">
+                                        Tipo: {uploadingDownloads[item.id].type} • Tamaño:{" "}
+                                        {uploadingDownloads[item.id].size}
+                                      </p>
+                                    </div>
+                                    <Button
+                                      onClick={() => cancelDownloadUpload(item.id)}
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-red-600 hover:text-red-700"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+
+                                  <div className="space-y-1 mb-2">
+                                    <Label className="text-xs">Descripción</Label>
+                                    <Textarea
+                                      value={uploadingDownloads[item.id].description}
+                                      onChange={(e) =>
+                                        setUploadingDownloads((prev) => ({
+                                          ...prev,
+                                          [item.id]: {
+                                            ...prev[item.id],
+                                            description: e.target.value,
+                                          },
+                                        }))
+                                      }
+                                      placeholder="Descripción del archivo"
+                                      rows={2}
+                                      className="text-sm"
+                                    />
+                                  </div>
+
+                                  <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                    Se subirá al guardar cambios
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="text-center py-6 text-gray-500">
+                                <FileText className="mx-auto h-8 w-8 mb-2 text-gray-300" />
+                                <p className="text-sm">
+                                  Haz clic en "Subir Archivo" para agregar contenido
+                                </p>
+                                <p className="text-xs mt-1">
+                                  Los archivos se subirán automáticamente a Cloudinary
+                                </p>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Info Section */}
+                  <TabsContent value="info" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Sección de Información</CardTitle>
+                        <CardDescription>
+                          Gestiona la información de la urbanización
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="info-title">Título de la Sección</Label>
+                            <Input
+                              id="info-title"
+                              value={content.info.title}
+                              onChange={(e) => updateInfo("title", e.target.value)}
+                              placeholder="Título de la sección"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="info-description">Descripción</Label>
+                            <Input
+                              id="info-description"
+                              value={content.info.description}
+                              onChange={(e) => updateInfo("description", e.target.value)}
+                              placeholder="Descripción de la sección"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Imagen Principal */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label>Imagen Principal</Label>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-700"
+                              onClick={() => {
+                                const input = document.getElementById(
+                                  "info-main-image"
+                                ) as HTMLInputElement;
+                                if (input) input.click();
+                              }}
+                            >
+                              <Upload className="h-4 w-4 mr-1" />
+                              Subir Imagen Principal
+                            </Button>
+                            <Input
+                              id="info-main-image"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleInfoMainImageChange}
+                              className="hidden"
+                            />
+                          </div>
+
+                          {/* Mostrar imagen actual si existe */}
+                          {content.info.mainImage && (
+                            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                              <div className="flex items-center gap-4">
                                 <img
-                                  src={image.url}
-                                  alt={image.title}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.currentTarget.src = "/placeholder.svg";
-                                  }}
+                                  src={content.info.mainImage.url}
+                                  alt={content.info.mainImage.title}
+                                  className="w-16 h-16 object-cover rounded"
                                 />
+                                <div className="flex-1">
+                                  <p className="font-medium text-sm">
+                                    {content.info.mainImage.title}
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    {content.info.mainImage.description}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                          )}
+
+                          {/* Formulario de subida si hay imagen seleccionada */}
+                          {uploadingInfoMainImage?.file && (
+                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-blue-800">
+                                    Imagen: {uploadingInfoMainImage.file?.name}
+                                  </p>
+                                  <p className="text-xs text-blue-600">
+                                    Tipo: {uploadingInfoMainImage.type} • Tamaño:{" "}
+                                    {uploadingInfoMainImage.size}
+                                  </p>
+                                </div>
+                                <Button
+                                  onClick={cancelInfoMainImageUpload}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+
+                              <div className="space-y-1 mb-2">
+                                <Label className="text-xs">Descripción</Label>
+                                <Textarea
+                                  value={uploadingInfoMainImage.description}
+                                  onChange={(e) =>
+                                    setUploadingInfoMainImage((prev) => ({
+                                      ...prev,
+                                      description: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Descripción de la imagen principal"
+                                  rows={2}
+                                  className="text-sm"
+                                />
+                              </div>
+
+                              <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                Se subirá al guardar cambios
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Estado vacío si no hay imagen */}
+                          {!content.info.mainImage && !uploadingInfoMainImage?.file && (
+                            <div className="text-center py-6 text-gray-500">
+                              <Image className="mx-auto h-8 w-8 mb-2 text-gray-300" />
+                              <p className="text-sm">
+                                Haz clic en "Subir Imagen Principal" para agregar una imagen
+                              </p>
+                              <p className="text-xs mt-1">
+                                Esta imagen se mostrará como imagen principal de la sección
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label>Secciones de Información</Label>
+                            <Button onClick={addInfoSection} variant="outline" size="sm">
+                              Agregar Sección
+                            </Button>
+                          </div>
+                          {content.info.sections.map((section, index) => (
+                            <Card key={section.id} className="p-4">
+                              <div className="flex items-start justify-between mb-4">
+                                <h4 className="font-medium">Sección {index + 1}</h4>
+                                <Button
+                                  onClick={() => removeInfoSection(section.id)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label>Título</Label>
+                                  <Input
+                                    value={section.title}
+                                    onChange={(e) =>
+                                      updateInfoSection(section.id, "title", e.target.value)
+                                    }
+                                    placeholder="Título de la sección"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Icono</Label>
+                                  <Select
+                                    value={section.icon}
+                                    onValueChange={(value) =>
+                                      updateInfoSection(section.id, "icon", value)
+                                    }
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="MapPinHouse">Ubicación</SelectItem>
+                                      <SelectItem value="BookText">Texto</SelectItem>
+                                      <SelectItem value="UsersRound">Usuarios</SelectItem>
+                                      <SelectItem value="BookCopy">Libro</SelectItem>
+                                      <SelectItem value="FileText">Documento</SelectItem>
+                                      <SelectItem value="Users">Usuarios</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              <div className="space-y-2 mt-4">
+                                <Label>Descripción</Label>
+                                <Textarea
+                                  value={section.description}
+                                  onChange={(e) =>
+                                    updateInfoSection(section.id, "description", e.target.value)
+                                  }
+                                  placeholder="Descripción de la sección"
+                                  rows={3}
+                                />
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Gallery Section */}
+                  <TabsContent value="gallery" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Sección de Galería</CardTitle>
+                        <CardDescription>Gestiona las imágenes de la galería</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="gallery-title">Título de la Sección</Label>
+                            <Input
+                              id="gallery-title"
+                              value={content.gallery.title}
+                              onChange={(e) => updateGallery("title", e.target.value)}
+                              placeholder="Título de la sección"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="gallery-description">Descripción</Label>
+                            <Input
+                              id="gallery-description"
+                              value={content.gallery.description}
+                              onChange={(e) => updateGallery("description", e.target.value)}
+                              placeholder="Descripción de la sección"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label>Imágenes de la Galería</Label>
+                            <Button onClick={addGalleryImage} variant="outline" size="sm">
+                              Agregar Imagen
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {content.gallery.images.map((image, index) => (
+                              <Card key={image.id} className="p-4">
+                                <div className="flex items-start justify-between mb-4">
+                                  <h4 className="font-medium">Imagen {index + 1}</h4>
+                                  <div className="flex gap-2">
+                                    {/* Botón de subida de imagen */}
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-blue-600 hover:text-blue-700"
+                                      onClick={() => {
+                                        const input = document.getElementById(
+                                          `gallery-image-${image.id}`
+                                        ) as HTMLInputElement;
+                                        if (input) input.click();
+                                      }}
+                                    >
+                                      <Upload className="h-4 w-4 mr-1" />
+                                      Subir Imagen
+                                    </Button>
+                                    <Input
+                                      id={`gallery-image-${image.id}`}
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(e) => handleGalleryImageChange(image.id, e)}
+                                      className="hidden"
+                                    />
+                                    <Button
+                                      onClick={() => removeGalleryImageItem(image.id)}
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-red-600 hover:text-red-700"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                {/* Formulario de subida si hay imagen seleccionada */}
+                                {uploadingGalleryImages[image.id]?.file && (
+                                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-blue-800">
+                                          Imagen: {uploadingGalleryImages[image.id].file?.name}
+                                        </p>
+                                        <p className="text-xs text-blue-600">
+                                          Tipo: {uploadingGalleryImages[image.id].type} • Tamaño:{" "}
+                                          {uploadingGalleryImages[image.id].size}
+                                        </p>
+                                      </div>
+                                      <Button
+                                        onClick={() => cancelGalleryUpload(image.id)}
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-red-600 hover:text-red-700"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+
+                                    <div className="space-y-1 mb-2">
+                                      <Label className="text-xs">Descripción</Label>
+                                      <Textarea
+                                        value={uploadingGalleryImages[image.id].description}
+                                        onChange={(e) =>
+                                          setUploadingGalleryImages((prev) => ({
+                                            ...prev,
+                                            [image.id]: {
+                                              ...prev[image.id],
+                                              description: e.target.value,
+                                            },
+                                          }))
+                                        }
+                                        placeholder="Descripción de la imagen"
+                                        rows={2}
+                                        className="text-sm"
+                                      />
+                                    </div>
+
+                                    <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                      Se subirá al guardar cambios
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="text-center py-6 text-gray-500">
+                                  <Image className="mx-auto h-8 w-8 mb-2 text-gray-300" />
+                                  <p className="text-sm">
+                                    Haz clic en "Subir Imagen" para agregar contenido
+                                  </p>
+                                  <p className="text-xs mt-1">
+                                    Las imágenes se subirán automáticamente a Cloudinary
+                                  </p>
+                                </div>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
           </>
         )}
       </div>

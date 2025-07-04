@@ -4,6 +4,9 @@ const {
   getHomeContent,
   getAdminHomeContent,
   createOrUpdateHomeContent,
+  uploadDownloadFile,
+  uploadGalleryImageFile,
+  uploadInfoMainImage,
   getHomeContentHistory,
   restoreHomeContent,
   deleteHomeContent,
@@ -25,15 +28,21 @@ router.get("/admin", existsToken, getAdminHomeContent);
 router.post(
   "/admin",
   existsToken,
-  validate(homeContentSchemaValidation),
-  createOrUpdateHomeContent
+  createOrUpdateHomeContent // Removido validate temporalmente para permitir archivos
 );
 router.put(
   "/content",
   existsToken,
-  validate(homeContentSchemaValidation),
-  createOrUpdateHomeContent
+  createOrUpdateHomeContent // Removido validate temporalmente para permitir archivos
 );
+
+// Rutas para subida de archivos individuales
+router.post("/admin/upload-download", existsToken, uploadDownloadFile);
+
+router.post("/admin/upload-gallery", existsToken, uploadGalleryImageFile);
+
+router.post("/admin/upload-info-main-image", existsToken, uploadInfoMainImage);
+
 router.get(
   "/admin/history",
   existsToken,
