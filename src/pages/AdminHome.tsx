@@ -409,6 +409,18 @@ const AdminHome = () => {
     }));
   };
 
+  const updateDownloadItem = (id: string, field: string, value: string) => {
+    setContent((prev) => ({
+      ...prev,
+      downloads: {
+        ...prev.downloads,
+        items: prev.downloads.items.map((item) =>
+          item.id === id ? { ...item, [field]: value } : item
+        ),
+      },
+    }));
+  };
+
   const addDownloadItem = () => {
     const newId = (content.downloads.items.length + 1).toString();
     setContent((prev) => ({
@@ -893,6 +905,30 @@ const AdminHome = () => {
                                 </div>
                               </div>
 
+                              {/* Campos editables del item */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="space-y-2">
+                                  <Label>Título del archivo</Label>
+                                  <Input
+                                    value={item.title}
+                                    onChange={(e) =>
+                                      updateDownloadItem(item.id, "title", e.target.value)
+                                    }
+                                    placeholder="Título del archivo"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Descripción</Label>
+                                  <Input
+                                    value={item.description || ""}
+                                    onChange={(e) =>
+                                      updateDownloadItem(item.id, "description", e.target.value)
+                                    }
+                                    placeholder="Descripción del archivo"
+                                  />
+                                </div>
+                              </div>
+
                               {/* Formulario de subida si hay archivo seleccionado */}
                               {uploadingDownloads[item.id]?.file && (
                                 <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -941,15 +977,53 @@ const AdminHome = () => {
                                 </div>
                               )}
 
-                              <div className="text-center py-6 text-gray-500">
-                                <FileText className="mx-auto h-8 w-8 mb-2 text-gray-300" />
-                                <p className="text-sm">
-                                  Haz clic en "Subir Archivo" para agregar contenido
-                                </p>
-                                <p className="text-xs mt-1">
-                                  Los archivos se subirán automáticamente a Cloudinary
-                                </p>
-                              </div>
+                              {/* Mostrar datos del archivo si ya existe */}
+                              {item.url && item.url !== "" && !item.url.startsWith("/docs/") ? (
+                                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                  <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0">
+                                      <FileText className="h-8 w-8 text-green-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <h5 className="font-medium text-green-800">{item.title}</h5>
+                                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                                          {item.type?.toUpperCase() || "PDF"}
+                                        </span>
+                                      </div>
+                                      {item.description && (
+                                        <p className="text-sm text-green-700 mb-2">
+                                          {item.description}
+                                        </p>
+                                      )}
+                                      <div className="flex items-center gap-4 text-xs text-green-600">
+                                        {item.size && <span>Tamaño: {item.size}</span>}
+                                        <span>ID: {item.id}</span>
+                                      </div>
+                                      <div className="mt-2">
+                                        <a
+                                          href={item.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-green-600 hover:text-green-800 underline"
+                                        >
+                                          Ver archivo en Cloudinary
+                                        </a>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-center py-6 text-gray-500">
+                                  <FileText className="mx-auto h-8 w-8 mb-2 text-gray-300" />
+                                  <p className="text-sm">
+                                    Haz clic en "Subir Archivo" para agregar contenido
+                                  </p>
+                                  <p className="text-xs mt-1">
+                                    Los archivos se subirán automáticamente a Cloudinary
+                                  </p>
+                                </div>
+                              )}
                             </Card>
                           ))}
                         </div>
