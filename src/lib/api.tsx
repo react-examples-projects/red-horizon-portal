@@ -267,6 +267,7 @@ export interface HomeContent {
       type: "pdf" | "word" | "excel" | "link";
       url: string;
       size?: string;
+      publicId?: string;
     }>;
   };
   info: {
@@ -293,6 +294,7 @@ export interface HomeContent {
       url: string;
       title: string;
       description: string;
+      publicId?: string;
     }>;
   };
 }
@@ -400,5 +402,16 @@ export const uploadInfoMainImage = async (
       "Content-Type": "multipart/form-data",
     },
   });
+  return response.data.data;
+};
+
+// Función para eliminar una imagen de galería
+export const deleteGalleryImage = async (
+  imageId: string
+): Promise<{
+  message: string;
+  content: HomeContent;
+}> => {
+  const response = await axiosInstance.delete(`/home/admin/gallery/${imageId}`);
   return response.data.data;
 };

@@ -5,6 +5,7 @@ import {
   uploadDownloadFile,
   uploadGalleryImage,
   uploadInfoMainImage,
+  deleteGalleryImage,
   type HomeContent,
 } from "@/lib/api";
 
@@ -172,6 +173,30 @@ export const useUploadInfoMainImage = () => {
     },
     onError: (error) => {
       console.error("useUploadInfoMainImage - Error:", error);
+    },
+  });
+};
+
+// Hook para eliminar una imagen de galería
+export const useDeleteGalleryImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (imageId: string) => {
+      console.log("useDeleteGalleryImage - Iniciando eliminación:", imageId);
+      const result = await deleteGalleryImage(imageId);
+      console.log("useDeleteGalleryImage - Resultado:", result);
+      return result;
+    },
+    onSuccess: (data) => {
+      console.log("useDeleteGalleryImage - Eliminación exitosa:", data);
+      // Actualizar el cache con el contenido actualizado
+      queryClient.setQueryData(["homeContent"], data.content);
+      // También invalidar para asegurar sincronización
+      queryClient.invalidateQueries({ queryKey: ["homeContent"] });
+    },
+    onError: (error) => {
+      console.error("useDeleteGalleryImage - Error:", error);
     },
   });
 };

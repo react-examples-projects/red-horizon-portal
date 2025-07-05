@@ -22,6 +22,7 @@ import {
   useUploadDownloadFile,
   useUploadGalleryImage,
   useUploadInfoMainImage,
+  useDeleteGalleryImage,
   HomeContent,
 } from "@/hooks/useHomeContent";
 
@@ -35,6 +36,7 @@ const AdminHome = () => {
   const uploadDownloadFileMutation = useUploadDownloadFile();
   const uploadGalleryImageMutation = useUploadGalleryImage();
   const uploadInfoMainImageMutation = useUploadInfoMainImage();
+  const deleteGalleryImageMutation = useDeleteGalleryImage();
 
   // Estados para archivos por item - Separados por tipo
   const [uploadingDownloads, setUploadingDownloads] = useState<{
@@ -197,6 +199,35 @@ const AdminHome = () => {
           console.log("handleSave - Usando contenido actualizado de subida:", updatedContent);
         }
       }
+
+      // Filtrar imágenes temporales que no se subieron
+      const tempImageIds = Object.keys(uploadingGalleryImages);
+      if (tempImageIds.length > 0) {
+        updatedContent = {
+          ...updatedContent,
+          gallery: {
+            ...updatedContent.gallery,
+            images: updatedContent.gallery.images.filter(
+              (image) => !tempImageIds.includes(image.id) || image.url !== ""
+            ),
+          },
+        };
+        console.log(
+          "handleSave - Contenido filtrado de imágenes temporales:",
+          updatedContent.gallery.images
+        );
+      }
+
+      // Asegurar que no haya imágenes duplicadas
+      const uniqueImages = [];
+      const seenIds = new Set();
+      updatedContent.gallery.images.forEach((image) => {
+        if (!seenIds.has(image.id)) {
+          seenIds.add(image.id);
+          uniqueImages.push(image);
+        }
+      });
+      updatedContent.gallery.images = uniqueImages;
 
       // Luego guardar el contenido
       console.log("handleSave - Contenido a guardar:", updatedContent);
@@ -514,13 +545,33 @@ const AdminHome = () => {
     }));
   };
 
-  const addGalleryImage = () => {
-    const newId = (content.gallery.images.length + 1).toString();
+  const updateGalleryImageItem = (id: string, field: string, value: string) => {
     setContent((prev) => ({
       ...prev,
       gallery: {
         ...prev.gallery,
-        images: [...prev.gallery.images],
+        images: prev.gallery.images.map((image) =>
+          image.id === id ? { ...image, [field]: value } : image
+        ),
+      },
+    }));
+  };
+
+  const addGalleryImage = () => {
+    const newId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    setContent((prev) => ({
+      ...prev,
+      gallery: {
+        ...prev.gallery,
+        images: [
+          ...prev.gallery.images,
+          {
+            id: newId,
+            title: "Nueva imagen",
+            description: "Descripción de la nueva imagen",
+            url: "", // URL vacía hasta que se suba una imagen
+          },
+        ],
       },
     }));
   };
@@ -540,6 +591,35 @@ const AdminHome = () => {
       delete newState[id];
       return newState;
     });
+  };
+
+  const deleteGalleryImage = async (imageId: string) => {
+    try {
+      await deleteGalleryImageMutation.mutateAsync(imageId);
+
+      // Actualizar el estado local
+      setContent((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          gallery: {
+            ...prev.gallery,
+            images: prev.gallery.images.filter((image) => image.id !== imageId),
+          },
+        };
+      });
+
+      toast({
+        title: "Imagen eliminada",
+        description: "La imagen ha sido eliminada exitosamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Hubo un error al eliminar la imagen",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -1083,7 +1163,7 @@ const AdminHome = () => {
                             <Input
                               id="info-main-image"
                               type="file"
-                              accept="image/*"
+                              accept=".jpg,.jpeg,.png,.gif,.webp"
                               onChange={handleInfoMainImageChange}
                               className="hidden"
                             />
@@ -1276,92 +1356,171 @@ const AdminHome = () => {
                               Agregar Imagen
                             </Button>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {content.gallery.images.map((image, index) => (
-                              <Card key={image.id} className="p-4">
-                                <div className="flex items-start justify-between mb-4">
-                                  <h4 className="font-medium">Imagen {index + 1}</h4>
-                                  <div className="flex gap-2">
-                                    {/* Botón de subida de imagen */}
+                          {content.gallery.images.map((image, index) => (
+                            <Card key={image.id} className="p-4">
+                              <div className="flex items-start justify-between mb-4">
+                                <h4 className="font-medium">Imagen {index + 1}</h4>
+                                <div className="flex gap-2">
+                                  {/* Botón de subida de imagen */}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-blue-600 hover:text-blue-700"
+                                    onClick={() => {
+                                      const input = document.getElementById(
+                                        `gallery-image-${image.id}`
+                                      ) as HTMLInputElement;
+                                      if (input) input.click();
+                                    }}
+                                  >
+                                    <Upload className="h-4 w-4 mr-1" />
+                                    Subir Imagen
+                                  </Button>
+                                  <Input
+                                    id={`gallery-image-${image.id}`}
+                                    type="file"
+                                    accept=".jpg,.jpeg,.png,.gif,.webp"
+                                    onChange={(e) => handleGalleryImageChange(image.id, e)}
+                                    className="hidden"
+                                  />
+                                  <Button
+                                    onClick={() => removeGalleryImageItem(image.id)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Campos editables del item */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="space-y-2">
+                                  <Label>Título de la imagen</Label>
+                                  <Input
+                                    value={image.title}
+                                    onChange={(e) =>
+                                      updateGalleryImageItem(image.id, "title", e.target.value)
+                                    }
+                                    placeholder="Título de la imagen"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Descripción</Label>
+                                  <Input
+                                    value={image.description || ""}
+                                    onChange={(e) =>
+                                      updateGalleryImageItem(
+                                        image.id,
+                                        "description",
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="Descripción de la imagen"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Formulario de subida si hay imagen seleccionada */}
+                              {uploadingGalleryImages[image.id]?.file && (
+                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex-1">
+                                      <p className="text-sm font-medium text-blue-800">
+                                        Imagen: {uploadingGalleryImages[image.id].file?.name}
+                                      </p>
+                                      <p className="text-xs text-blue-600">
+                                        Tipo: {uploadingGalleryImages[image.id].type} • Tamaño:{" "}
+                                        {uploadingGalleryImages[image.id].size}
+                                      </p>
+                                    </div>
                                     <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-blue-600 hover:text-blue-700"
-                                      onClick={() => {
-                                        const input = document.getElementById(
-                                          `gallery-image-${image.id}`
-                                        ) as HTMLInputElement;
-                                        if (input) input.click();
-                                      }}
-                                    >
-                                      <Upload className="h-4 w-4 mr-1" />
-                                      Subir Imagen
-                                    </Button>
-                                    <Input
-                                      id={`gallery-image-${image.id}`}
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={(e) => handleGalleryImageChange(image.id, e)}
-                                      className="hidden"
-                                    />
-                                    <Button
-                                      onClick={() => removeGalleryImageItem(image.id)}
+                                      onClick={() => cancelGalleryUpload(image.id)}
                                       variant="outline"
                                       size="sm"
                                       className="text-red-600 hover:text-red-700"
                                     >
-                                      <X className="h-4 w-4" />
+                                      <X className="h-3 w-3" />
                                     </Button>
                                   </div>
+
+                                  <div className="space-y-1 mb-2">
+                                    <Label className="text-xs">Descripción</Label>
+                                    <Textarea
+                                      value={uploadingGalleryImages[image.id].description}
+                                      onChange={(e) =>
+                                        setUploadingGalleryImages((prev) => ({
+                                          ...prev,
+                                          [image.id]: {
+                                            ...prev[image.id],
+                                            description: e.target.value,
+                                          },
+                                        }))
+                                      }
+                                      placeholder="Descripción de la imagen"
+                                      rows={2}
+                                      className="text-sm"
+                                    />
+                                  </div>
+
+                                  <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                    Se subirá al guardar cambios
+                                  </div>
                                 </div>
+                              )}
 
-                                {/* Formulario de subida si hay imagen seleccionada */}
-                                {uploadingGalleryImages[image.id]?.file && (
-                                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-blue-800">
-                                          Imagen: {uploadingGalleryImages[image.id].file?.name}
-                                        </p>
-                                        <p className="text-xs text-blue-600">
-                                          Tipo: {uploadingGalleryImages[image.id].type} • Tamaño:{" "}
-                                          {uploadingGalleryImages[image.id].size}
-                                        </p>
-                                      </div>
-                                      <Button
-                                        onClick={() => cancelGalleryUpload(image.id)}
-                                        variant="outline"
-                                        size="sm"
-                                        className="text-red-600 hover:text-red-700"
-                                      >
-                                        <X className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-
-                                    <div className="space-y-1 mb-2">
-                                      <Label className="text-xs">Descripción</Label>
-                                      <Textarea
-                                        value={uploadingGalleryImages[image.id].description}
-                                        onChange={(e) =>
-                                          setUploadingGalleryImages((prev) => ({
-                                            ...prev,
-                                            [image.id]: {
-                                              ...prev[image.id],
-                                              description: e.target.value,
-                                            },
-                                          }))
-                                        }
-                                        placeholder="Descripción de la imagen"
-                                        rows={2}
-                                        className="text-sm"
+                              {/* Mostrar datos de la imagen si ya existe */}
+                              {image.url && image.url !== "" && !image.url.startsWith("/docs/") ? (
+                                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                  <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0">
+                                      <img
+                                        src={image.url}
+                                        alt={image.title}
+                                        className="w-16 h-16 object-cover rounded"
                                       />
                                     </div>
-
-                                    <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                                      Se subirá al guardar cambios
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <h5 className="font-medium text-green-800">
+                                          {image.title}
+                                        </h5>
+                                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                                          IMAGEN
+                                        </span>
+                                      </div>
+                                      {image.description && (
+                                        <p className="text-sm text-green-700 mb-2">
+                                          {image.description}
+                                        </p>
+                                      )}
+                                      <div className="flex items-center gap-4 text-xs text-green-600">
+                                        <span>ID: {image.id}</span>
+                                      </div>
+                                      <div className="mt-2 flex gap-2">
+                                        <a
+                                          href={image.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-green-600 hover:text-green-800 underline"
+                                        >
+                                          Ver imagen en Cloudinary
+                                        </a>
+                                        <button
+                                          onClick={() => deleteGalleryImage(image.id)}
+                                          disabled={deleteGalleryImageMutation.isPending}
+                                          className="text-xs text-red-600 hover:text-red-800 underline disabled:opacity-50"
+                                        >
+                                          {deleteGalleryImageMutation.isPending
+                                            ? "Eliminando..."
+                                            : "Eliminar"}
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
-                                )}
+                                </div>
+                              ) : (
                                 <div className="text-center py-6 text-gray-500">
                                   <Image className="mx-auto h-8 w-8 mb-2 text-gray-300" />
                                   <p className="text-sm">
@@ -1371,9 +1530,9 @@ const AdminHome = () => {
                                     Las imágenes se subirán automáticamente a Cloudinary
                                   </p>
                                 </div>
-                              </Card>
-                            ))}
-                          </div>
+                              )}
+                            </Card>
+                          ))}
                         </div>
                       </CardContent>
                     </Card>

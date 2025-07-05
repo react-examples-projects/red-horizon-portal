@@ -175,6 +175,33 @@ class HomeContentService {
   }
 
   /**
+   * Elimina una imagen específica de la galería
+   * @param {string} imageId - ID de la imagen a eliminar
+   * @returns {Promise<Object>} El contenido actualizado
+   */
+  async deleteGalleryImage(imageId) {
+    try {
+      // Buscar el contenido activo
+      const currentContent = await HomeContent.findOne({ isActive: true });
+
+      if (!currentContent) {
+        throw new Error("No se encontró contenido activo");
+      }
+
+      // Eliminar la imagen del array usando $pull
+      const updatedContent = await HomeContent.findOneAndUpdate(
+        { _id: currentContent._id },
+        { $pull: { "gallery.images": { id: imageId } } },
+        { new: true, runValidators: false }
+      );
+
+      return updatedContent;
+    } catch (error) {
+      throw new Error(`Error al eliminar imagen de galería: ${error.message}`);
+    }
+  }
+
+  /**
    * Actualiza la imagen principal de la sección de información
    * @param {Object} imageData - Datos de la imagen
    * @returns {Promise<Object>} El contenido actualizado

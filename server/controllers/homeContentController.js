@@ -5,6 +5,7 @@ const {
   deleteMultipleFiles,
   uploadGalleryImage,
   uploadDownloadDocument,
+  deleteFile,
 } = require("../helpers/cloudinary");
 const { success, error } = require("../helpers/httpResponses");
 
@@ -343,6 +344,53 @@ async function getHomeContentStats(req, res) {
   }
 }
 
+// Función para eliminar una imagen de galería
+async function deleteGalleryImage(req, res) {
+  try {
+    const { imageId } = req.params;
+
+    if (!imageId) {
+      return error(res, "ID de imagen es requerido");
+    }
+
+    // Obtener el contenido actual para encontrar la imagen
+    const currentContent = await homeContentService.getHomeContent();
+
+    if (!currentContent) {
+      return error(res, "No se encontró contenido activo");
+    }
+
+    // Buscar la imagen en la galería
+    const image = currentContent.gallery.images.find((img) => img.id === imageId);
+
+    if (!image) {
+      return error(res, "Imagen no encontrada");
+    }
+
+    // Eliminar la imagen de Cloudinary si tiene publicId
+    if (image.publicId) {
+      try {
+        await deleteFile(image.publicId);
+        console.log(`Imagen eliminada de Cloudinary: ${image.publicId}`);
+      } catch (cloudinaryError) {
+        console.error("Error al eliminar imagen de Cloudinary:", cloudinaryError);
+        // Continuar aunque falle la eliminación en Cloudinary
+      }
+    }
+
+    // Eliminar la imagen del contenido
+    const updatedContent = await homeContentService.deleteGalleryImage(imageId);
+
+    return success(res, {
+      message: "Imagen eliminada exitosamente",
+      content: updatedContent,
+    });
+  } catch (err) {
+    console.error(err);
+    return error(res, err);
+  }
+}
+
 module.exports = {
   getHomeContent,
   getAdminHomeContent,
@@ -354,4 +402,5 @@ module.exports = {
   uploadDownloadFile,
   uploadGalleryImageFile,
   uploadInfoMainImage,
+  deleteGalleryImage,
 };

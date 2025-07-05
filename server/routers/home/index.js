@@ -7,6 +7,7 @@ const {
   uploadDownloadFile,
   uploadGalleryImageFile,
   uploadInfoMainImage,
+  deleteGalleryImage,
   getHomeContentHistory,
   restoreHomeContent,
   deleteHomeContent,
@@ -40,6 +41,8 @@ router.put(
 router.post("/admin/upload-download", existsToken, uploadDownloadFile);
 
 router.post("/admin/upload-gallery", existsToken, uploadGalleryImageFile);
+
+router.delete("/admin/gallery/:imageId", existsToken, deleteGalleryImage);
 
 router.post("/admin/upload-info-main-image", existsToken, uploadInfoMainImage);
 
