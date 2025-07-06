@@ -19,7 +19,7 @@ axiosInstance.interceptors.request.use((req) => {
     "/home/content",
   ];
   const resetPatterns = [/^\/reset\/[a-zA-Z0-9]+$/, /^\/resetAdmin\/[a-zA-Z0-9]+$/];
-  const publicPostPattern = /^\/posts\/[a-zA-Z0-9]+$/;
+  const publicPostPattern = /^\/posts\/public\/[a-zA-Z0-9]+$/;
   const postsPattern = /^\/posts(\?.*)?$/;
   const matchCurrentUrl = resetPatterns.some((pattern) => pattern.test(req.url));
   const matchPublicPost = publicPostPattern.test(req.url);
