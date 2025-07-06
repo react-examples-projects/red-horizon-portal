@@ -14,6 +14,7 @@ const SERVER = {
     ALLOWED_DOMAINS: [
       "http://localhost:3000",
       "http://localhost:8080",
+      "https://red-horizon-portal.vercel.app",
     ],
     RATE_LIMITS: {
       windowMs: 10 * 60 * 1000, // 10 minutes
